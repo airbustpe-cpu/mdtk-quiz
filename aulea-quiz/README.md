@@ -11,9 +11,15 @@ Runs as its own Netlify site, separate from ci747.com's main site.
 
 ## Access
 
-Netlify dashboard → project → Identity:
+First administrator (one time, Netlify dashboard → project → Identity):
 
 1. Enable Identity and set Registration to **Invite only**.
-2. Invite users by email. They set their own password from the invitation link.
-3. To make someone an administrator, edit the user and add the role `admin`.
-   The role applies from that user's next sign-in.
+2. Invite yourself by email and set a password from the invitation link.
+3. Edit your user and add the role `admin`.
+
+After that, administrators manage everyone from the **Users** tab in the site:
+add a user (a temporary password is generated and shown once), create a new
+password, make or remove administrators, and remove users. Users with a
+temporary password must choose their own at their next sign-in, and anyone can
+use **Change password** in the header. Every API call re-reads the account from
+Identity, so removing a user or changing a role takes effect immediately.

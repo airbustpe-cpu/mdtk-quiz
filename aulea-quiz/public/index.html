@@ -48,7 +48,7 @@ header.top .sub{color:var(--muted);font-size:.85rem;margin-top:4px}
 .register td{vertical-align:middle}
 @media (max-width:640px){.register{padding:14px 12px}.register th,.register td{padding:8px 6px}}
 .docno{font-family:var(--f-mono);font-size:.75rem;color:var(--muted)}
-.tabs{display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid var(--line)}
+.tabs{display:grid;grid-auto-columns:1fr;grid-auto-flow:column;border-bottom:1px solid var(--line)}
 @media (min-width:641px){.tabs{display:flex;gap:4px}}
 .tab{appearance:none;border:0;background:none;font:inherit;font-weight:600;color:var(--muted);padding:12px 14px;min-height:46px;border-bottom:3px solid transparent;cursor:pointer}
 .tab[aria-selected="true"]{color:var(--accent);border-bottom-color:var(--accent)}
@@ -156,6 +156,21 @@ footer.src{font-size:.74rem;color:var(--muted);border-top:1px solid var(--line);
 
 .docno{text-align:right;display:flex;flex-direction:column;gap:2px}
 #userBox{font-family:var(--f-body);font-size:.8rem;word-break:break-all}
+.users{display:flex;flex-direction:column;gap:14px}
+.uadd{border:1px solid var(--line);background:var(--surface);border-radius:var(--r);padding:16px;display:flex;flex-direction:column;gap:12px}
+.uadd h2,.ulist h2{margin:0;font-family:var(--f-display);font-size:1rem}
+.uadd .row{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end}
+.uadd .row .field{flex:1 1 240px}
+.check{display:flex;align-items:center;gap:8px;min-height:44px;font-size:.9rem}
+.check input{width:18px;height:18px;accent-color:var(--accent)}
+.pwbox{border:1px solid var(--ok);background:var(--ok-soft);border-radius:var(--r);padding:12px 14px;display:flex;flex-direction:column;gap:8px}
+.pwbox code{font-family:var(--f-mono);font-size:1.15rem;letter-spacing:.04em;user-select:all;-webkit-user-select:all;word-break:break-all}
+.ulist{display:flex;flex-direction:column;gap:8px}
+.urow{border:1px solid var(--line);background:var(--surface);border-radius:var(--r);padding:12px 14px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.urow .top{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:baseline;justify-content:space-between}
+.urow .em{font-weight:600;word-break:break-all}
+.urow .meta{font-size:.8rem;color:var(--muted)}
+.urow .acts{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
 .linkbtn{appearance:none;border:0;background:none;color:var(--accent);font:inherit;font-size:.85rem;cursor:pointer;padding:6px 0;text-decoration:underline;align-self:flex-start;min-height:0}
 .auth{display:flex;justify-content:center;padding-block:24px}
 .authcard{width:100%;max-width:380px;border:1px solid var(--line);background:var(--surface);border-radius:var(--r);padding:20px;gap:12px}
@@ -175,14 +190,14 @@ footer.src{font-size:.74rem;color:var(--muted);border-top:1px solid var(--line);
       <div class="sub">Veloxion demo &amp; clinical evaluation, SEA. One record per case.</div>
       </div>
     </div>
-    <div class="docno"><div>Form AUL-SEA-UR · Rev. 8</div><div id="userBox" hidden><span id="userEmail"></span> · <button type="button" class="linkbtn" id="signOut" style="display:inline;padding:0">Sign out</button></div></div>
+    <div class="docno"><div>Form AUL-SEA-UR · Rev. 9</div><div id="userBox" hidden><span id="userEmail"></span> · <button type="button" class="linkbtn" id="changePw" style="display:inline;padding:0">Change password</button> · <button type="button" class="linkbtn" id="signOut" style="display:inline;padding:0">Sign out</button></div></div>
   </header>
 
   <section id="authView" class="auth">
     <div id="authLoading" class="hint">Checking sign-in…</div>
     <form id="loginForm" class="authcard" novalidate hidden>
       <h2>Sign in</h2>
-      <div class="hint">Access is by invitation. Use the email address that received the invitation.</div>
+      <div class="hint">Accounts are set up by the administrator. Use the email and password you were given.</div>
       <div class="field"><label for="loginEmail">Email</label><input type="email" id="loginEmail" autocomplete="username" inputmode="email" autocapitalize="none" spellcheck="false"></div>
       <div class="field"><label for="loginPw">Password</label><input type="password" id="loginPw" autocomplete="current-password"></div>
       <span class="msg" id="loginMsg"></span>
@@ -191,11 +206,12 @@ footer.src{font-size:.74rem;color:var(--muted);border-top:1px solid var(--line);
     </form>
     <form id="pwForm" class="authcard" novalidate hidden>
       <h2 id="pwTitle">Set your password</h2>
-      <div class="hint">At least 8 characters.</div>
+      <div class="hint" id="pwHint">At least 8 characters.</div>
       <div class="field"><label for="newPw">New password</label><input type="password" id="newPw" autocomplete="new-password"></div>
       <div class="field"><label for="newPw2">Repeat password</label><input type="password" id="newPw2" autocomplete="new-password"></div>
       <span class="msg" id="pwMsg"></span>
       <button type="submit" class="btn primary" id="pwBtn">Save password and continue</button>
+      <button type="button" class="btn" id="pwCancel" hidden>Cancel</button>
     </form>
   </section>
 
@@ -203,6 +219,7 @@ footer.src{font-size:.74rem;color:var(--muted);border-top:1px solid var(--line);
   <div class="tabs" role="tablist">
     <button class="tab" role="tab" id="tab-form" aria-selected="true" aria-controls="view-form">New record</button>
     <button class="tab" role="tab" id="tab-list" aria-selected="false" aria-controls="view-list">All records<span class="count" id="count">0</span></button>
+    <button class="tab" role="tab" id="tab-users" aria-selected="false" aria-controls="view-users" hidden>Users</button>
   </div>
 
   <div id="status" class="notice" hidden></div>
@@ -393,6 +410,26 @@ footer.src{font-size:.74rem;color:var(--muted);border-top:1px solid var(--line);
     </div>
   </section>
 
+  <section id="view-users" role="tabpanel" aria-labelledby="tab-users" hidden>
+    <div class="users">
+      <form class="uadd" id="uAddForm" novalidate>
+        <h2>Add a user</h2>
+        <div class="hint">A password is created for the person. Give it to them; they are asked to choose their own at first sign-in.</div>
+        <div class="row">
+          <div class="field"><label for="uEmail">Email</label><input type="email" id="uEmail" autocomplete="off" inputmode="email" autocapitalize="none" spellcheck="false"></div>
+          <label class="check"><input type="checkbox" id="uAdmin">Administrator</label>
+          <button type="submit" class="btn primary" id="uAddBtn">Add user</button>
+        </div>
+        <span class="hint" id="uMsg"></span>
+        <div class="pwbox" id="uPwBox" hidden></div>
+      </form>
+      <div class="ulist">
+        <h2>Users <span class="hint" id="uCount"></span></h2>
+        <div id="uRows"></div>
+      </div>
+    </div>
+  </section>
+
   </div>
 
   <footer class="src">Form items agreed between MedicalTek and Aulea, "Demo / clinical evaluation report for Veloxion disposables in SEA", 16–18 Nov 2026. Feedback items follow the outcome measures of the registered Veloxion study NCT07728071 (visibility, setup, case flow, procedure time vs. reusable).</footer>
@@ -439,13 +476,11 @@ async function api(path,opt){
 
 /* ---------- tabs ---------- */
 function showTab(which){
-  const isForm=which==="form";
-  $("#tab-form").setAttribute("aria-selected",isForm);
-  $("#tab-list").setAttribute("aria-selected",!isForm);
-  $("#view-form").hidden=!isForm; $("#view-list").hidden=isForm;
+  ["form","list","users"].forEach(t=>{$("#tab-"+t).setAttribute("aria-selected",t===which);$("#view-"+t).hidden=t!==which});
 }
 $("#tab-form").onclick=()=>showTab("form");
 $("#tab-list").onclick=()=>{showTab("list");loadData()};
+$("#tab-users").onclick=()=>{showTab("users");loadUsers()};
 function status(text,kind){const s=$("#status");if(!text){s.hidden=true;return}s.textContent=text;s.className="notice"+(kind?" "+kind:"");s.hidden=false}
 
 /* ---------- items ---------- */
@@ -715,6 +750,54 @@ $("#xlsxBtn").onclick=async()=>{
 
 /* ---------- boot ---------- */
 renderReg();resetForm();
+/* ---------- users (admin) ---------- */
+let users=[],meId="",uConfirm=null;
+const fmtDate=d=>d?String(d).replace("T"," ").slice(0,16)+" UTC":"never";
+function showPw(email,pw){
+  const b=$("#uPwBox");b.hidden=false;
+  b.innerHTML=`<div><b>${esc(email)}</b></div><div class="hint">Password (shown once, copy it now):</div><code id="uPwText">${esc(pw)}</code><div class="acts" style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="btn sm" id="uCopy">Copy email and password</button><button type="button" class="btn ghost sm" id="uPwClose">Done</button></div>`;
+  $("#uCopy").onclick=async()=>{const t="Aulea Device Usage Record\n"+location.origin+"\nEmail: "+email+"\nPassword: "+pw;
+    try{await navigator.clipboard.writeText(t);$("#uCopy").textContent="Copied"}catch(_){const r=document.createRange();r.selectNodeContents($("#uPwText"));const sel=getSelection();sel.removeAllRanges();sel.addRange(r)}};
+  $("#uPwClose").onclick=()=>{b.hidden=true;b.innerHTML=""};
+  b.scrollIntoView({behavior:"smooth",block:"nearest"});
+}
+function renderUsers(){
+  $("#uCount").textContent="("+users.length+")";
+  $("#uRows").innerHTML=users.map(u=>{const self=u.id===meId;const conf=uConfirm&&uConfirm.id===u.id?uConfirm.kind:"";
+    return `<div class="urow" data-id="${esc(u.id)}"><div class="top"><span class="em">${esc(u.email)}${self?" (you)":""}</span><span>${u.isAdmin?'<span class="pill ok">Admin</span>':""} ${u.tempPassword?'<span class="pill warn">Temporary password</span>':""}</span></div>
+    <div class="meta">Added ${esc(fmtDate(u.createdAt))} · Last sign-in ${esc(fmtDate(u.lastSignInAt))}</div>
+    <div class="acts">${conf==="remove"?`<span>Remove ${esc(u.email)}? Their records stay.</span><button type="button" class="btn sm danger" data-act="removeYes">Remove</button><button type="button" class="btn sm" data-act="cancel">Cancel</button>`
+      :conf==="reset"?`<span>Create a new password for ${esc(u.email)}?</span><button type="button" class="btn sm primary" data-act="resetYes">Create</button><button type="button" class="btn sm" data-act="cancel">Cancel</button>`
+      :`<button type="button" class="btn sm" data-act="reset">New password</button>${self?"":`<button type="button" class="btn sm" data-act="${u.isAdmin?"demote":"promote"}">${u.isAdmin?"Remove admin":"Make admin"}</button><button type="button" class="btn sm danger" data-act="remove">Remove user</button>`}`}</div></div>`}).join("")||'<div class="empty">No users yet.</div>';
+  $("#uRows").querySelectorAll("button[data-act]").forEach(b=>b.onclick=()=>userAct(b.closest(".urow").dataset.id,b.dataset.act,b));
+}
+async function loadUsers(){
+  if(!canAdmin)return;
+  try{const d=await api("users");users=d.users||[];meId=d.me||"";renderUsers()}
+  catch(e){if(e.code==="admin_only"){canAdmin=false;$("#tab-users").hidden=true;showTab("form")}else if(e.code!=="unauthorized")$("#uRows").innerHTML='<div class="empty">The user list could not be loaded. Open the Users tab again.</div>'}
+}
+async function userAct(id,act,btn){
+  const u=users.find(x=>x.id===id);if(!u)return;
+  if(act==="cancel"){uConfirm=null;renderUsers();return}
+  if(act==="remove"||act==="reset"){uConfirm={id,kind:act};renderUsers();return}
+  btn.disabled=true;
+  try{
+    if(act==="removeYes"){await api("users/"+encodeURIComponent(id),{method:"DELETE"});users=users.filter(x=>x.id!==id);status("Removed "+u.email+". They can no longer sign in.","ok")}
+    else if(act==="resetYes"){const d=await api("users/"+encodeURIComponent(id),{method:"PATCH",body:JSON.stringify({action:"reset_password"})});users=users.map(x=>x.id===id?d.user:x);showPw(u.email,d.password)}
+    else{const d=await api("users/"+encodeURIComponent(id),{method:"PATCH",body:JSON.stringify({action:"set_admin",isAdmin:act==="promote"})});users=users.map(x=>x.id===id?d.user:x)}
+  }catch(e){if(e.code!=="unauthorized")status(e.code==="self"?"You cannot remove yourself or your own admin role.":"That change could not be saved. Try again.","warn")}
+  uConfirm=null;renderUsers();
+}
+$("#uAddForm").addEventListener("submit",async e=>{
+  e.preventDefault();const msg=$("#uMsg"),email=$("#uEmail").value.trim();msg.textContent="";
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){msg.textContent="Enter a valid email address.";return}
+  const btn=$("#uAddBtn");btn.disabled=true;btn.textContent="Adding…";
+  try{const d=await api("users",{method:"POST",body:JSON.stringify({email,isAdmin:$("#uAdmin").checked})});
+    users=[...users,d.user].sort((a,b)=>a.email.localeCompare(b.email));renderUsers();$("#uEmail").value="";$("#uAdmin").checked=false;showPw(d.user.email,d.password)}
+  catch(e){if(e.code!=="unauthorized")msg.textContent=e.code==="exists_or_failed"?"That email already has an account, or the account could not be created.":e.code==="bad_email"?"Enter a valid email address.":"Could not add the user. Try again."}
+  finally{btn.disabled=false;btn.textContent="Add user"}
+});
+
 function showAuth(which){
   $("#authView").hidden=false;$("#appView").hidden=true;$("#userBox").hidden=true;
   ["authLoading","loginForm","pwForm"].forEach(id=>{$("#"+id).hidden=id!==which});
@@ -728,10 +811,23 @@ async function enterApp(){
   try{me=await api("me")}
   catch(e){if(e.code!=="unauthorized"){showAuth("loginForm");$("#loginMsg").textContent="The server could not be reached. Try again in a moment."}return false}
   canAdmin=!!me.isAdmin;$("#userEmail").textContent=me.email+(canAdmin?" (admin)":"");
+  $("#tab-users").hidden=!canAdmin;if(!canAdmin&&!$("#view-users").hidden)showTab("form");
+  if(me.tempPassword){openPw("temp");return true}
   $("#authView").hidden=true;$("#appView").hidden=false;$("#userBox").hidden=false;
   renderReg();loadData();return true;
 }
 let pwMode=null;
+function openPw(type,token){
+  pwMode={type,token};
+  const t={invite:["Welcome. Set your password","At least 8 characters."],recovery:["Choose a new password","At least 8 characters."],
+    temp:["Choose your own password","You signed in with a password from the administrator. Choose your own to continue. At least 8 characters."],
+    change:["Change password","At least 8 characters."]}[type];
+  $("#pwTitle").textContent=t[0];$("#pwHint").textContent=t[1];$("#pwMsg").textContent="";
+  $("#pwCancel").hidden=type!=="change";
+  showAuth("pwForm");if(type==="temp"||type==="change")$("#userBox").hidden=false;
+}
+$("#changePw").onclick=()=>openPw("change");
+$("#pwCancel").onclick=()=>{$("#newPw").value="";$("#newPw2").value="";pwMode=null;$("#authView").hidden=true;$("#appView").hidden=false;$("#userBox").hidden=false};
 $("#loginForm").addEventListener("submit",async e=>{
   e.preventDefault();const msg=$("#loginMsg");msg.className="msg";msg.textContent="";
   const email=$("#loginEmail").value.trim(),pw=$("#loginPw").value;
@@ -754,20 +850,21 @@ $("#pwForm").addEventListener("submit",async e=>{
   if(p1!==p2){msg.textContent="The two passwords do not match.";return}
   const btn=$("#pwBtn");btn.disabled=true;
   try{
-    if(pwMode&&pwMode.type==="invite")await NAuth.acceptInvite(pwMode.token,p1);else await NAuth.updateUser({password:p1});
+    if(pwMode&&pwMode.type==="invite")await NAuth.acceptInvite(pwMode.token,p1);else await NAuth.updateUser({password:p1,data:{temp_password:false}});
+    const wasChange=pwMode&&pwMode.type==="change";
     pwMode=null;$("#newPw").value="";$("#newPw2").value="";
-    if(!(await enterApp()))showAuth("loginForm");
-  }catch(_){msg.textContent="Could not save the password. The link may have expired. Ask for a new one."}
+    if(!(await enterApp()))showAuth("loginForm");else if(wasChange)status("Password changed.","ok");
+  }catch(_){msg.textContent=pwMode&&(pwMode.type==="change"||pwMode.type==="temp")?"Could not save the password. Sign out, sign in again and retry.":"Could not save the password. The link may have expired. Ask for a new one."}
   finally{btn.disabled=false}
 });
-$("#signOut").onclick=async()=>{try{await NAuth.logout()}catch(_){}records=[];reg={};me=null;canAdmin=false;render();closeDetail();status("");showAuth("loginForm")};
+$("#signOut").onclick=async()=>{try{await NAuth.logout()}catch(_){}records=[];reg={};me=null;canAdmin=false;users=[];$("#uRows").innerHTML="";$("#uPwBox").hidden=true;$("#tab-users").hidden=true;showTab("form");render();closeDetail();status("");showAuth("loginForm")};
 (async()=>{
   if(!window.NAuth){showAuth("loginForm");$("#loginMsg").textContent="Sign-in could not load. Reload the page.";return}
   let cb=null;
   try{cb=await NAuth.handleAuthCallback()}
   catch(_){showAuth("loginForm");$("#loginMsg").textContent="That link is no longer valid. Ask for a new one.";return}
-  if(cb&&cb.type==="invite"&&cb.token){pwMode={type:"invite",token:cb.token};$("#pwTitle").textContent="Welcome. Set your password";showAuth("pwForm");return}
-  if(cb&&cb.type==="recovery"){pwMode={type:"recovery"};$("#pwTitle").textContent="Choose a new password";showAuth("pwForm");return}
+  if(cb&&cb.type==="invite"&&cb.token){openPw("invite",cb.token);return}
+  if(cb&&cb.type==="recovery"){openPw("recovery");return}
   let u=null;try{u=await NAuth.getUser()}catch(_){}
   if(u)await enterApp();else showAuth("loginForm");
 })();

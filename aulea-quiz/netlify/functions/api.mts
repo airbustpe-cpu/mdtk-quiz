@@ -1,10 +1,12 @@
 import type { Config, Context } from "@netlify/functions";
 import { getStore } from "@netlify/blobs";
-import { getUser, verifyRequestOrigin } from "@netlify/identity";
+import { admin, getUser, verifyRequestOrigin } from "@netlify/identity";
 
 // All data access goes through this function. Every request must carry a valid
-// Netlify Identity session; deleting records and editing the equipment register
-// additionally need the "admin" role (set per user in the Netlify dashboard).
+// Netlify Identity session, and the account is re-read from Identity on each
+// request so that removing a user or changing their role applies at once.
+// Deleting records, editing the equipment register and managing users need the
+// "admin" role.
 
 const STORE = "aulea-usage";
 const REPORT_ID = /^AUL-\d{8}-[A-Z0-9]{6}$/;
@@ -54,10 +56,34 @@ function cleanReport(b: any) {
   };
 }
 
+const PW_CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789";
+function tempPassword() {
+  const b = crypto.getRandomValues(new Uint8Array(12));
+  const c = Array.from(b, (x) => PW_CHARS[x % PW_CHARS.length]).join("");
+  return `${c.slice(0, 4)}-${c.slice(4, 8)}-${c.slice(8, 12)}`;
+}
+const hasAdmin = (u: any) => (u?.roles ?? []).includes("admin");
+const withRole = (appMeta: any, makeAdmin: boolean) => {
+  const roles = new Set<string>(Array.isArray(appMeta?.roles) ? appMeta.roles : []);
+  makeAdmin ? roles.add("admin") : roles.delete("admin");
+  return { ...(appMeta ?? {}), roles: [...roles] };
+};
+const userView = (u: any) => ({
+  id: u.id, email: u.email ?? "", isAdmin: hasAdmin(u),
+  tempPassword: u.userMetadata?.temp_password === true,
+  createdAt: u.createdAt ?? "", lastSignInAt: u.lastSignInAt ?? "",
+});
+
 export default async (req: Request, context: Context) => {
-  const user = await getUser();
-  if (!user) return json({ error: "unauthorized" }, 401);
-  const isAdmin = (user.roles ?? []).includes("admin");
+  const session = await getUser();
+  if (!session) return json({ error: "unauthorized" }, 401);
+  let user: any;
+  try {
+    user = await admin.getUser(session.id);
+  } catch {
+    return json({ error: "unauthorized" }, 401);
+  }
+  const isAdmin = hasAdmin(user);
 
   if (req.method !== "GET") {
     try {
@@ -71,7 +97,60 @@ export default async (req: Request, context: Context) => {
   const store = getStore({ name: STORE, consistency: "strong" });
 
   if (resource === "me" && req.method === "GET") {
-    return json({ email: user.email ?? "", isAdmin });
+    return json({ email: user.email ?? "", isAdmin, tempPassword: user.userMetadata?.temp_password === true });
+  }
+
+  if (resource === "users") {
+    if (!isAdmin) return json({ error: "admin_only" }, 403);
+    if (req.method === "GET" && !id) {
+      const all: any[] = [];
+      for (let page = 1; page <= 20; page++) {
+        const batch = await admin.listUsers({ page, perPage: 100 });
+        all.push(...batch);
+        if (batch.length < 100) break;
+      }
+      all.sort((a, b) => String(a.email).localeCompare(String(b.email)));
+      return json({ users: all.map(userView), me: user.id });
+    }
+    if (req.method === "POST" && !id) {
+      const body = (await req.json().catch(() => null)) as any;
+      const email = str(body?.email, 200).toLowerCase();
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return json({ error: "bad_email" }, 400);
+      const password = tempPassword();
+      try {
+        const created = await admin.createUser({
+          email, password,
+          data: { app_metadata: withRole({}, body?.isAdmin === true), user_metadata: { temp_password: true } },
+        });
+        return json({ user: userView(created), password }, 201);
+      } catch {
+        return json({ error: "exists_or_failed" }, 409);
+      }
+    }
+    if (id && !/^[0-9a-f-]{8,64}$/i.test(id)) return json({ error: "bad_id" }, 400);
+    if (req.method === "DELETE" && id) {
+      if (id === user.id) return json({ error: "self" }, 400);
+      await admin.deleteUser(id);
+      return json({ deleted: id });
+    }
+    if (req.method === "PATCH" && id) {
+      const body = (await req.json().catch(() => null)) as any;
+      const target = await admin.getUser(id).catch(() => null);
+      if (!target) return json({ error: "not_found" }, 404);
+      if (body?.action === "reset_password") {
+        const password = tempPassword();
+        const updated = await admin.updateUser(id, {
+          password, user_metadata: { ...(target.userMetadata ?? {}), temp_password: true },
+        });
+        return json({ user: userView(updated), password });
+      }
+      if (body?.action === "set_admin" && typeof body.isAdmin === "boolean") {
+        if (id === user.id && !body.isAdmin) return json({ error: "self" }, 400);
+        const updated = await admin.updateUser(id, { app_metadata: withRole(target.appMetadata, body.isAdmin) });
+        return json({ user: userView(updated) });
+      }
+      return json({ error: "bad_action" }, 400);
+    }
   }
 
   if (resource === "equipment") {
@@ -132,5 +211,5 @@ export default async (req: Request, context: Context) => {
 };
 
 export const config: Config = {
-  path: ["/api/me", "/api/reports", "/api/reports/:id", "/api/equipment"],
+  path: ["/api/me", "/api/reports", "/api/reports/:id", "/api/equipment", "/api/users", "/api/users/:id"],
 };
