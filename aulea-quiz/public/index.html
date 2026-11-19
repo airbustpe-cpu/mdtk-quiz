@@ -1,0 +1,1004 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>Aulea Device Usage Record</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+body{margin:0}
+img{max-width:100%}
+/* Layout: a single case-record sheet; numbered form sections, a records ledger tab (table on desktop, cards on phone) */
+:root{
+  --bg:#f3f5f4; --surface:#ffffff; --surface-2:#eef2f1; --fg:#17211f; --muted:#5b6a66;
+  --line:#d5dddb; --accent:#0f6e66; --accent-fg:#ffffff; --accent-soft:#dcefec;
+  --warn:#a5560b; --warn-soft:#fbecd9; --danger:#b3261e; --ok:#1f7a3a; --ok-soft:#ddf1e3;
+  --paper:#ffffff;
+  --f-display:"IBM Plex Sans",system-ui,sans-serif;
+  --f-body:"IBM Plex Sans",system-ui,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+  --r:6px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0f1514; --surface:#161e1d; --surface-2:#1d2726; --fg:#e4ecea; --muted:#94a5a1;
+  --line:#2c3836; --accent:#3cb3a6; --accent-fg:#06201d; --accent-soft:#163633;
+  --warn:#e8a25a; --warn-soft:#3a2a17; --danger:#ff8a80; --ok:#6fd08f; --ok-soft:#173322;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f1514; --surface:#161e1d; --surface-2:#1d2726; --fg:#e4ecea; --muted:#94a5a1;
+  --line:#2c3836; --accent:#3cb3a6; --accent-fg:#06201d; --accent-soft:#163633;
+  --warn:#e8a25a; --warn-soft:#3a2a17; --danger:#ff8a80; --ok:#6fd08f; --ok-soft:#173322;
+  color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{-webkit-text-size-adjust:100%}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:15px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 32px}
+.wrap{max-width:980px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+header.top{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:8px 12px;border-bottom:2px solid var(--fg);padding-bottom:12px}
+header.top h1{font-family:var(--f-display);font-size:clamp(1.25rem,4.6vw,1.6rem);margin:0;letter-spacing:-.01em;text-wrap:balance;line-height:1.2}
+header.top .sub{color:var(--muted);font-size:.85rem;margin-top:4px}
+.brand{display:flex;align-items:center;gap:14px;min-width:0}
+.brand .logo{height:46px;width:auto;flex:none}
+@media (max-width:640px){.brand .logo{height:38px}}
+.register{margin-top:8px;border:1px solid var(--line);background:var(--surface);border-radius:var(--r);padding:16px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.register h2{margin:0;font-family:var(--f-display);font-size:1rem}
+.register td{vertical-align:middle}
+@media (max-width:640px){.register{padding:14px 12px}.register th,.register td{padding:8px 6px}}
+.docno{font-family:var(--f-mono);font-size:.75rem;color:var(--muted)}
+.tabs{display:grid;grid-auto-columns:1fr;grid-auto-flow:column;border-bottom:1px solid var(--line)}
+@media (min-width:641px){.tabs{display:flex;gap:4px}}
+.tab{appearance:none;border:0;background:none;font:inherit;font-weight:600;color:var(--muted);padding:12px 14px;min-height:46px;border-bottom:3px solid transparent;cursor:pointer}
+.tab[aria-selected="true"]{color:var(--accent);border-bottom-color:var(--accent)}
+.tab .count{font-family:var(--f-mono);font-size:.75rem;background:var(--surface-2);border-radius:10px;padding:1px 7px;margin-left:6px;color:var(--fg)}
+.tab:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,.card:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.notice{border:1px solid var(--line);background:var(--surface);border-radius:var(--r);padding:10px 14px;font-size:.88rem;color:var(--muted)}
+.notice.warn{border-color:var(--warn);background:var(--warn-soft);color:var(--fg)}
+.notice.ok{border-color:var(--ok);background:var(--ok-soft);color:var(--fg)}
+form{display:flex;flex-direction:column;gap:16px}
+fieldset{border:1px solid var(--line);background:var(--surface);border-radius:var(--r);margin:0;padding:16px;display:flex;flex-direction:column;gap:14px;min-width:0}
+@media (max-width:640px){fieldset{padding:14px 12px}}
+legend{font-family:var(--f-display);font-weight:700;font-size:1rem;padding:0 6px;display:flex;align-items:baseline;gap:8px}
+legend .sec{font-family:var(--f-mono);font-size:.75rem;color:var(--accent);font-weight:500}
+legend .opt{color:var(--muted);font-weight:500;font-size:.85rem}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(220px,100%),1fr));gap:12px 16px}
+.field{display:flex;flex-direction:column;gap:4px;min-width:0}
+label,.lbl{font-size:.82rem;font-weight:600;color:var(--fg)}
+.req{color:var(--danger);margin-left:2px}
+input[type=text],input[type=email],input[type=password],input[type=date],input[type=number],select,textarea{font:inherit;font-size:16px;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:4px;padding:10px;min-height:44px;width:100%;min-width:0}
+input[type=date]{-webkit-appearance:none;appearance:none}
+input[type=file]{font:inherit;font-size:.9rem;max-width:100%}
+textarea{min-height:84px;resize:vertical}
+.mono{font-family:var(--f-mono)}
+.hint{font-size:.78rem;color:var(--muted)}
+.radios{display:flex;flex-wrap:wrap;gap:8px}
+.radios label{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:4px;padding:8px 12px;min-height:44px;font-weight:500;font-size:.92rem;cursor:pointer;background:var(--bg)}
+.radios label:has(input:checked){border-color:var(--accent);background:var(--accent-soft)}
+.radios input{accent-color:var(--accent);width:18px;height:18px;margin:0}
+.rates{display:flex;flex-direction:column}
+.rate{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 12px;align-items:center;padding-block:8px;border-bottom:1px solid var(--line)}
+.rate:last-child{border-bottom:0}
+.rate .q{font-size:.9rem;font-weight:500}
+@media (max-width:640px){.rate{grid-template-columns:1fr}}
+.seg{display:flex;gap:4px;position:relative}
+.seg label{flex:1;min-width:44px;min-height:42px;display:flex;align-items:center;justify-content:center;border:1px solid var(--line);border-radius:4px;background:var(--bg);font-family:var(--f-mono);font-weight:500;font-size:.9rem;cursor:pointer}
+.seg input{position:absolute;opacity:0;width:1px;height:1px}
+.seg label:has(input:checked){background:var(--accent);border-color:var(--accent);color:var(--accent-fg)}
+.seg label:has(input:focus-visible){outline:2px solid var(--accent);outline-offset:2px}
+.items{display:flex;flex-direction:column;gap:10px}
+.item{display:grid;grid-template-columns:minmax(0,2.2fr) minmax(0,1.6fr) 84px 44px;gap:8px;align-items:end;padding:10px;border:1px dashed var(--line);border-radius:4px}
+.item .other{grid-column:1 / -1}
+.item .rm{height:44px;justify-content:center}
+@media (max-width:640px){.item{grid-template-columns:minmax(0,1fr) 84px}.item .f-pn{grid-column:1 / -1}.item .rm{grid-column:1 / -1;justify-self:end;height:auto}}
+.btn{appearance:none;font:inherit;font-weight:600;border-radius:4px;border:1px solid var(--line);background:var(--surface);color:var(--fg);padding:10px 16px;min-height:44px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-fg)}
+.btn:disabled{opacity:.55;cursor:not-allowed}
+.btn.ghost{border-color:transparent;background:none;color:var(--muted)}
+.btn.danger{color:var(--danger)}
+.btn.sm{font-size:.86rem;padding:8px 12px}
+.sigs{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(280px,100%),1fr));gap:18px}
+.sigbox{display:flex;flex-direction:column;gap:8px;min-width:0}
+.pad{position:relative;border:1px solid var(--line);border-radius:4px;background:var(--paper);touch-action:none;-webkit-user-select:none;user-select:none;width:100%;aspect-ratio:5 / 2;max-width:100%}
+.pad canvas{position:absolute;inset:0;width:100%;height:100%;cursor:crosshair;border-radius:4px;touch-action:none}
+.pad .base{position:absolute;left:12px;right:12px;bottom:22%;border-bottom:1px solid #c7cfd8;pointer-events:none}
+.pad .x{position:absolute;left:12px;bottom:calc(22% + 2px);font-family:var(--f-mono);color:#8a97a5;font-size:.8rem;pointer-events:none}
+.padbar{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.stamp-prev{max-height:90px;max-width:160px;border:1px solid var(--line);border-radius:4px;background:var(--paper)}
+.actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:flex-end;position:sticky;bottom:0;padding-block:12px calc(12px + env(safe-area-inset-bottom,0px));background:linear-gradient(to top,var(--bg) 75%,transparent)}
+.actions .msg{flex:1 1 100%;font-size:.86rem;color:var(--danger)}
+.actions .msg:empty{display:none}
+@media (max-width:640px){.actions .btn{flex:1}.actions #submitBtn{flex:2}}
+/* records */
+.summary{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.chip{font-family:var(--f-mono);font-size:.78rem;border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:3px 10px}
+.chip b{font-family:var(--f-body)}
+.toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.toolbar input{flex:1 1 220px;max-width:340px}
+.toolbar .spacer{flex:1}
+@media (max-width:640px){.toolbar input{max-width:none}.toolbar .spacer{display:none}.toolbar .btn{flex:1 1 100%}}
+.tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:var(--r);background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:.86rem;min-width:760px}
+th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:.74rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);background:var(--surface-2);font-weight:600}
+#rows tr{cursor:pointer}
+#rows tr:hover{background:var(--accent-soft)}
+td.num{font-family:var(--f-mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+.cards{display:none;flex-direction:column;gap:10px}
+.card{border:1px solid var(--line);background:var(--surface);border-radius:var(--r);padding:12px 14px;display:flex;flex-direction:column;gap:4px;cursor:pointer;text-align:left;font:inherit;color:inherit;width:100%}
+.card .row1{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.card .no{font-family:var(--f-mono);font-size:.78rem;color:var(--muted)}
+.card .h{font-weight:600}
+.card .meta{font-size:.84rem;color:var(--muted)}
+.card .prod{font-family:var(--f-mono);font-size:.8rem}
+@media (max-width:640px){.tablewrap.list{display:none}.cards{display:flex}}
+.pill{display:inline-block;font-size:.72rem;font-weight:600;border-radius:10px;padding:1px 8px;white-space:nowrap}
+.pill.ok{background:var(--ok-soft);color:var(--ok)}
+.pill.warn{background:var(--warn-soft);color:var(--warn)}
+.empty{padding:36px 16px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:var(--r)}
+.empty strong{display:block;color:var(--fg);font-size:1rem;margin-bottom:4px}
+/* detail */
+.detail{border:1px solid var(--accent);background:var(--surface);border-radius:var(--r);padding:16px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.detail h2{margin:0;font-family:var(--f-mono);font-size:1rem;word-break:break-all}
+.dl{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(200px,100%),1fr));gap:10px 18px;margin:0}
+.dl div{min-width:0}
+.dl dt{font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+.dl dd{margin:0;word-break:break-word}
+.lines{display:flex;flex-direction:column;gap:6px}
+.line{display:grid;grid-template-columns:70px minmax(0,1fr) auto;gap:4px 10px;font-size:.88rem;border-bottom:1px solid var(--line);padding-bottom:6px}
+.line .lot{grid-column:2 / 3;font-family:var(--f-mono);font-size:.8rem;color:var(--muted)}
+.sigimg{background:var(--paper);border:1px solid var(--line);border-radius:4px;max-width:260px;width:100%;display:block}
+.confirm{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+footer.src{font-size:.74rem;color:var(--muted);border-top:1px solid var(--line);padding-top:10px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
+
+.docno{text-align:right;display:flex;flex-direction:column;gap:2px}
+#userBox{font-family:var(--f-body);font-size:.8rem;word-break:break-all}
+.users{display:flex;flex-direction:column;gap:14px}
+.ig{display:flex;gap:6px;min-width:0}
+.ig input{flex:1;min-width:0}
+.scanbtn{flex:none;padding:8px 12px;gap:6px}
+.scanbtn svg{width:20px;height:20px}
+.udi{grid-column:1 / -1;font-family:var(--f-mono);font-size:.78rem;color:var(--muted);display:flex;flex-wrap:wrap;gap:4px 12px}
+.udi .exp-bad{color:var(--danger);font-weight:600;font-family:var(--f-body)}
+.scanov{position:fixed;inset:0;z-index:50;background:rgba(5,12,11,.88);display:flex;align-items:center;justify-content:center;
+  padding:max(12px,env(safe-area-inset-top,0px)) max(12px,env(safe-area-inset-right,0px)) max(12px,env(safe-area-inset-bottom,0px)) max(12px,env(safe-area-inset-left,0px))}
+.scanbox{width:100%;max-width:520px;background:var(--surface);border-radius:var(--r);padding:14px;display:flex;flex-direction:column;gap:10px;max-height:100%;overflow:auto}
+.scanbox h2{margin:0;font-family:var(--f-display);font-size:1rem}
+.viewfinder{position:relative;width:100%;aspect-ratio:4 / 3;background:#000;border-radius:4px;overflow:hidden}
+.viewfinder video{width:100%;height:100%;object-fit:cover;display:block}
+.viewfinder .frame{position:absolute;inset:22% 18%;border:2px solid #7fe0d4;border-radius:6px;box-shadow:0 0 0 999px rgba(0,0,0,.28);pointer-events:none}
+.scanrow{display:flex;flex-wrap:wrap;gap:8px}
+.scanrow .btn{flex:1 1 auto}
+.scanmsg{font-size:.86rem;color:var(--danger)}
+.scanmsg:empty{display:none}
+.scanres{border:1px solid var(--ok);background:var(--ok-soft);border-radius:4px;padding:10px 12px;font-size:.88rem;display:flex;flex-direction:column;gap:4px}
+.scanres .k{color:var(--muted);font-size:.75rem;text-transform:uppercase;letter-spacing:.04em}
+.scanres .v{font-family:var(--f-mono);word-break:break-all}
+.uadd{border:1px solid var(--line);background:var(--surface);border-radius:var(--r);padding:16px;display:flex;flex-direction:column;gap:12px}
+.uadd h2,.ulist h2{margin:0;font-family:var(--f-display);font-size:1rem}
+.uadd .row{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end}
+.uadd .row .field{flex:1 1 240px}
+.check{display:flex;align-items:center;gap:8px;min-height:44px;font-size:.9rem}
+.check input{width:18px;height:18px;accent-color:var(--accent)}
+.pwbox{border:1px solid var(--ok);background:var(--ok-soft);border-radius:var(--r);padding:12px 14px;display:flex;flex-direction:column;gap:8px}
+.pwbox code{font-family:var(--f-mono);font-size:1.15rem;letter-spacing:.04em;user-select:all;-webkit-user-select:all;word-break:break-all}
+.ulist{display:flex;flex-direction:column;gap:8px}
+.urow{border:1px solid var(--line);background:var(--surface);border-radius:var(--r);padding:12px 14px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.urow .top{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:baseline;justify-content:space-between}
+.urow .em{font-weight:600;word-break:break-all}
+.urow .meta{font-size:.8rem;color:var(--muted)}
+.urow .acts{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.linkbtn{appearance:none;border:0;background:none;color:var(--accent);font:inherit;font-size:.85rem;cursor:pointer;padding:6px 0;text-decoration:underline;align-self:flex-start;min-height:0}
+.auth{display:flex;justify-content:center;padding-block:24px}
+.authcard{width:100%;max-width:380px;border:1px solid var(--line);background:var(--surface);border-radius:var(--r);padding:20px;gap:12px}
+.authcard h2{margin:0;font-family:var(--f-display);font-size:1.15rem}
+.authcard .msg{color:var(--danger);font-size:.86rem}
+.authcard .msg.ok{color:var(--ok)}
+.authcard .msg:empty{display:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <img class="logo" src="data:image/png;base64,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" alt="MDTK MedicalTek" width="710" height="316">
+      <div>
+      <h1>Aulea Device Usage Record</h1>
+      <div class="sub">Veloxion demo &amp; clinical evaluation, SEA. One record per case.</div>
+      </div>
+    </div>
+    <div class="docno"><div>Form AUL-SEA-UR · Rev. 11</div><div id="userBox" hidden><span id="userEmail"></span> · <button type="button" class="linkbtn" id="changePw" style="display:inline;padding:0">Change password</button> · <button type="button" class="linkbtn" id="signOut" style="display:inline;padding:0">Sign out</button></div></div>
+  </header>
+
+  <section id="authView" class="auth">
+    <div id="authLoading" class="hint">Checking sign-in…</div>
+    <form id="loginForm" class="authcard" novalidate hidden>
+      <h2>Sign in</h2>
+      <div class="hint">Accounts are set up by the administrator. Use the email and password you were given.</div>
+      <div class="field"><label for="loginEmail">Email</label><input type="email" id="loginEmail" autocomplete="username" inputmode="email" autocapitalize="none" spellcheck="false"></div>
+      <div class="field"><label for="loginPw">Password</label><input type="password" id="loginPw" autocomplete="current-password"></div>
+      <span class="msg" id="loginMsg"></span>
+      <button type="submit" class="btn primary" id="loginBtn">Sign in</button>
+      <button type="button" class="linkbtn" id="forgotBtn">Forgot password?</button>
+    </form>
+    <form id="pwForm" class="authcard" novalidate hidden>
+      <h2 id="pwTitle">Set your password</h2>
+      <div class="hint" id="pwHint">At least 8 characters.</div>
+      <div class="field"><label for="newPw">New password</label><input type="password" id="newPw" autocomplete="new-password"></div>
+      <div class="field"><label for="newPw2">Repeat password</label><input type="password" id="newPw2" autocomplete="new-password"></div>
+      <span class="msg" id="pwMsg"></span>
+      <button type="submit" class="btn primary" id="pwBtn">Save password and continue</button>
+      <button type="button" class="btn" id="pwCancel" hidden>Cancel</button>
+    </form>
+  </section>
+
+  <div id="appView" hidden style="display:flex;flex-direction:column;gap:18px">
+  <div class="tabs" role="tablist">
+    <button class="tab" role="tab" id="tab-form" aria-selected="true" aria-controls="view-form">New record</button>
+    <button class="tab" role="tab" id="tab-list" aria-selected="false" aria-controls="view-list">All records<span class="count" id="count">0</span></button>
+    <button class="tab" role="tab" id="tab-users" aria-selected="false" aria-controls="view-users" hidden>Users</button>
+  </div>
+
+  <div id="status" class="notice" hidden></div>
+
+  <!-- ===== FORM ===== -->
+  <section id="view-form" role="tabpanel" aria-labelledby="tab-form">
+    <form id="f" novalidate>
+      <fieldset>
+        <legend><span class="sec">01</span>Case information</legend>
+        <div class="grid">
+          <div class="field"><label for="hospital">Hospital name<span class="req">*</span></label><input type="text" id="hospital" autocomplete="organization"></div>
+          <div class="field"><label for="country">Country</label>
+            <select id="country"><option value="">Select</option><option>Malaysia</option><option>Thailand</option><option>Singapore</option><option>Philippines</option><option>Indonesia</option><option>Vietnam</option><option>India</option><option>Taiwan</option><option>Other</option></select></div>
+          <div class="field"><label for="department">Department</label><input type="text" id="department" value="Urology"></div>
+          <div class="field"><label for="surgeon">Surgeon name<span class="req">*</span></label><input type="text" id="surgeon" autocomplete="off"></div>
+          <div class="field"><label for="useDate">Date of use<span class="req">*</span></label><input type="date" id="useDate"></div>
+          <div class="field"><label for="demoSystem">Veloxion demo system</label>
+            <select id="demoSystem"><option value="">Select</option><option>Veloxion 1</option><option>Veloxion 2</option><option>Other</option></select></div>
+        </div>
+        <div class="field">
+          <span class="lbl">Procedure</span>
+          <div class="radios">
+            <label><input type="radio" name="procedure" value="TURP">TURP</label>
+            <label><input type="radio" name="procedure" value="TURBT">TURBT</label>
+            <label><input type="radio" name="procedure" value="Phantom / dry lab">Phantom / dry lab</label>
+            <label><input type="radio" name="procedure" value="Other">Other</label>
+          </div>
+          <input type="text" id="procedureOther" placeholder="Describe the procedure" hidden>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend><span class="sec">02</span>Products used</legend>
+        <div class="items" id="items"></div>
+        <div><button type="button" class="btn sm" id="addItem">+ Add item</button></div>
+        <div class="hint">PN list per Aulea Product System (17 Nov). Pick "Other" for anything not listed.</div>
+        <div class="grid">
+          <div class="field"><span class="lbl">Darwin (MS-301) unit</span>
+            <div class="radios">
+              <label><input type="radio" name="unitDarwin" value="Darwin 1">Darwin 1</label>
+              <label><input type="radio" name="unitDarwin" value="Darwin 2">Darwin 2</label>
+              <label><input type="radio" name="unitDarwin" value="Not used">Not used</label>
+            </div><span class="hint" id="snHintDarwin"></span></div>
+          <div class="field"><span class="lbl">FSN 3D monitor unit</span>
+            <div class="radios">
+              <label><input type="radio" name="unitFSN" value="FSN 1">FSN 1</label>
+              <label><input type="radio" name="unitFSN" value="FSN 2">FSN 2</label>
+              <label><input type="radio" name="unitFSN" value="Not used">Not used</label>
+            </div><span class="hint" id="snHintFSN"></span></div>
+        </div>
+        <div class="hint">Set 1 pairs Veloxion 1 with Darwin 1 and FSN 1; set 2 likewise. Choosing the Veloxion demo system above fills these in. Change them if a different unit was used. Serial numbers come from the Equipment register at the bottom of this page.</div>
+      </fieldset>
+
+      <fieldset>
+        <legend><span class="sec">03</span>Surgeon feedback <span class="opt">optional</span></legend>
+        <div class="grid">
+          <div class="field"><span class="lbl">Surgeon's experience with Veloxion</span>
+            <div class="radios">
+              <label><input type="radio" name="experience" value="First case">First case</label>
+              <label><input type="radio" name="experience" value="2-5 cases">2–5 cases</label>
+              <label><input type="radio" name="experience" value="More than 5 cases">More than 5</label>
+            </div></div>
+          <div class="field"><span class="lbl">Visualization used</span>
+            <div class="radios">
+              <label><input type="radio" name="viewMode" value="2D only">2D only</label>
+              <label><input type="radio" name="viewMode" value="3D throughout">3D throughout</label>
+              <label><input type="radio" name="viewMode" value="3D and 2D (switched during case)">3D and 2D, switched during the case</label>
+            </div></div>
+        </div>
+        <div id="rowMixed" hidden style="display:flex;flex-direction:column;gap:14px">
+          <div class="field"><span class="lbl">Share of the case viewed in 3D <span class="hint">best estimate</span></span>
+            <div class="radios">
+              <label><input type="radio" name="share3D" value="Under 25%">Under 25%</label>
+              <label><input type="radio" name="share3D" value="25-50%">25–50%</label>
+              <label><input type="radio" name="share3D" value="50-75%">50–75%</label>
+              <label><input type="radio" name="share3D" value="Over 75%">Over 75%</label>
+            </div></div>
+          <div class="field"><span class="lbl">Why 2D was used <span class="hint">tick all that apply</span></span>
+            <div class="radios" id="why2dHost"></div></div>
+        </div>
+        <div class="grid" id="row3d" hidden>
+          <div class="field"><span class="lbl">Scope type set on MS-301</span>
+            <div class="radios">
+              <label><input type="radio" name="scopeType" value="Rigid">Rigid</label>
+              <label><input type="radio" name="scopeType" value="Flexible">Flexible</label>
+            </div></div>
+          <div class="field"><span class="lbl">3D disparity setting <span class="hint" id="dispHint"></span></span>
+            <div class="seg" id="dispSeg" role="radiogroup" aria-label="3D disparity setting"></div></div>
+        </div>
+        <div class="field">
+          <span class="lbl">Performance rating <span class="hint">1 = poor, 5 = excellent, N/A = not used or not observed</span></span>
+          <div class="rates" id="ratings"></div>
+        </div>
+        <div class="grid">
+          <div class="field"><span class="lbl">Overall, compared with the usual reusable resectoscope</span>
+            <div class="radios">
+              <label><input type="radio" name="vsOverall" value="Better">Better</label>
+              <label><input type="radio" name="vsOverall" value="Same">Same</label>
+              <label><input type="radio" name="vsOverall" value="Worse">Worse</label>
+              <label><input type="radio" name="vsOverall" value="N/A">N/A</label>
+            </div></div>
+          <div class="field"><span class="lbl">Procedure time, compared with reusable</span>
+            <div class="radios">
+              <label><input type="radio" name="vsTime" value="Shorter">Shorter</label>
+              <label><input type="radio" name="vsTime" value="Same">Same</label>
+              <label><input type="radio" name="vsTime" value="Longer">Longer</label>
+              <label><input type="radio" name="vsTime" value="N/A">N/A</label>
+            </div></div>
+        </div>
+        <div class="field">
+          <span class="lbl">Events during the case <span class="hint">tick any that occurred, leave blank if none</span></span>
+          <div class="radios">
+            <span id="eventsHost" style="display:contents"></span>
+          </div>
+          <textarea id="issueNote" placeholder="Describe what happened and the affected PN / lot" hidden></textarea>
+        </div>
+        <div class="grid">
+          <div class="field"><label for="procMin">Total procedure time <span class="hint">minutes, scope in to scope out</span></label><input type="number" id="procMin" min="0" inputmode="numeric"></div>
+          <div class="field"><span class="lbl">Would the surgeon use Veloxion again?</span>
+            <div class="radios">
+              <label><input type="radio" name="useAgain" value="Yes">Yes</label>
+              <label><input type="radio" name="useAgain" value="Maybe">Maybe</label>
+              <label><input type="radio" name="useAgain" value="No">No</label>
+            </div></div>
+        </div>
+        <div class="field"><label for="feedback">Other comments</label><textarea id="feedback"></textarea></div>
+      </fieldset>
+
+      <fieldset>
+        <legend><span class="sec">04</span>Signatures</legend>
+        <div class="sigs">
+          <div class="sigbox">
+            <div class="grid">
+              <div class="field"><label for="distCompany">Distributor company</label><input type="text" id="distCompany" value="MedicalTek Co., Ltd."></div>
+              <div class="field"><label for="distRep">Distributor representative<span class="req">*</span></label><input type="text" id="distRep" autocomplete="name"></div>
+            </div>
+            <div class="pad" id="padDist"><div class="base"></div><span class="x">×</span><canvas aria-label="Distributor signature pad"></canvas></div>
+            <div class="padbar"><span class="hint">Sign with finger or mouse</span><button type="button" class="btn ghost sm" data-clear="padDist">Clear</button></div>
+          </div>
+          <div class="sigbox">
+            <div class="grid">
+              <div class="field"><label for="hospRep">Hospital representative<span class="req">*</span></label><input type="text" id="hospRep" autocomplete="off"></div>
+              <div class="field"><label for="hospTitle">Title</label><input type="text" id="hospTitle" placeholder="Surgeon / OR nurse"></div>
+            </div>
+            <div class="pad" id="padHosp"><div class="base"></div><span class="x">×</span><canvas aria-label="Hospital signature pad"></canvas></div>
+            <div class="padbar"><span class="hint">Sign with finger or mouse</span><button type="button" class="btn ghost sm" data-clear="padHosp">Clear</button></div>
+          </div>
+        </div>
+        <div class="field">
+          <label for="stamp">Company stamp photo <span class="hint">(optional, if available)</span></label>
+          <input type="file" id="stamp" accept="image/*">
+          <img id="stampPrev" class="stamp-prev" alt="Stamp preview" hidden>
+        </div>
+      </fieldset>
+
+      <div class="actions">
+        <span class="msg" id="formMsg"></span>
+        <button type="button" class="btn" id="resetBtn">Clear form</button>
+        <button type="submit" class="btn primary" id="submitBtn">Submit</button>
+      </div>
+    </form>
+    <div class="register">
+      <h2>Equipment register</h2>
+      <div class="hint">Shared list of the demo units. A serial number saved here shows on every record that used the unit, and in the Excel file. Only administrators can edit it.</div>
+      <div class="tablewrap"><table style="min-width:0"><thead><tr><th>Unit</th><th>Model</th><th>Serial No.</th></tr></thead><tbody id="regRows"></tbody></table></div>
+      <div class="confirm"><button type="button" class="btn sm" id="regSave">Save serial numbers</button><span class="hint" id="regMsg"></span></div>
+    </div>
+  </section>
+
+  <!-- ===== LIST ===== -->
+  <section id="view-list" role="tabpanel" aria-labelledby="tab-list" hidden>
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div class="summary" id="summary"></div>
+      <div class="toolbar">
+        <input type="text" id="q" placeholder="Search hospital, surgeon, PN, lot, unit">
+        <span class="spacer"></span>
+        <button type="button" class="btn primary" id="xlsxBtn">Download Excel</button>
+      </div>
+      <div id="detail" hidden></div>
+      <div class="tablewrap list" id="tableWrap">
+        <table>
+          <thead><tr><th>Report No.</th><th>Date of use</th><th>Hospital</th><th>Surgeon</th><th>Procedure</th><th>Products (PN × qty)</th><th>Events</th></tr></thead>
+          <tbody id="rows"></tbody>
+        </table>
+      </div>
+      <div class="cards" id="cards"></div>
+      <div class="empty" id="empty"><strong>No records yet</strong>Submitted records appear here for everyone. Fill in the first one on the New record tab.</div>
+    </div>
+  </section>
+
+  <section id="view-users" role="tabpanel" aria-labelledby="tab-users" hidden>
+    <div class="users">
+      <form class="uadd" id="uAddForm" novalidate>
+        <h2>Add a user</h2>
+        <div class="hint">A password is created for the person. Give it to them; they are asked to choose their own at first sign-in.</div>
+        <div class="row">
+          <div class="field"><label for="uEmail">Email</label><input type="email" id="uEmail" autocomplete="off" inputmode="email" autocapitalize="none" spellcheck="false"></div>
+          <label class="check"><input type="checkbox" id="uAdmin">Administrator</label>
+          <button type="submit" class="btn primary" id="uAddBtn">Add user</button>
+        </div>
+        <span class="hint" id="uMsg"></span>
+        <div class="pwbox" id="uPwBox" hidden></div>
+      </form>
+      <div class="ulist">
+        <h2>Users <span class="hint" id="uCount"></span></h2>
+        <div id="uRows"></div>
+      </div>
+    </div>
+  </section>
+
+  </div>
+
+  <div class="scanov" id="scanner" hidden role="dialog" aria-modal="true" aria-labelledby="scanTitle">
+    <div class="scanbox">
+      <h2 id="scanTitle">Scan barcode</h2>
+      <div class="viewfinder" id="vf"><video id="scanVideo" playsinline muted autoplay></video><div class="frame"></div></div>
+      <div class="hint" id="scanHint">Hold the label flat and fill the box with the barcode. Data Matrix and linear barcodes both work.</div>
+      <div class="scanres" id="scanRes" hidden></div>
+      <span class="scanmsg" id="scanMsg"></span>
+      <div class="scanrow">
+        <button type="button" class="btn primary" id="scanUse" hidden>Use this</button>
+        <button type="button" class="btn" id="scanAgain" hidden>Scan again</button>
+        <button type="button" class="btn" id="scanTorch" hidden>Light</button>
+        <label class="btn" for="scanPhoto">Take a photo instead</label>
+        <input type="file" id="scanPhoto" accept="image/*" capture="environment" hidden>
+        <button type="button" class="btn ghost" id="scanCancel">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <footer class="src">Form items agreed between MedicalTek and Aulea, "Demo / clinical evaluation report for Veloxion disposables in SEA", 16–18 Nov 2026. Feedback items follow the outcome measures of the registered Veloxion study NCT07728071 (visibility, setup, case flow, procedure time vs. reusable).</footer>
+</div>
+<script src="auth.js"></script>
+<script src="exceljs.min.js"></script>
+<script>
+(function(){
+const PRODUCTS=[
+  {pn:"2490",name:"Veloxion Resectoscope"},
+  {pn:"1327",name:"Veloxion Fluid Control Set"},
+  {pn:"1877",name:"Waste Management Tubing"},
+  {pn:"1878",name:"Tissue Catch"},
+  {pn:"OTHER",name:"Other"}
+];
+const PLANNED_SETS=30;
+const WHY_2D=["Surgeon preference / habit","Eye strain or dizziness","3D glasses uncomfortable","3D image looked unnatural","Poor visibility (bleeding, debris)","Image delay noticed","Technical problem with 3D","Other"];
+const is3D=()=>val("viewMode").startsWith("3D");
+const isMixed=()=>val("viewMode").startsWith("3D and 2D");
+const RATINGS=[
+  {k:"rSetup",t:"Setup and priming"},
+  {k:"rImage",t:"Image clarity / visibility"},
+  {k:"rDepth",t:"3D depth perception"},
+  {k:"rFluid",t:"Irrigation and pressure stability"},
+  {k:"rEvac",t:"Tissue evacuation (no clogging)"},
+  {k:"rCut",t:"Cutting performance"},
+  {k:"rCoag",t:"Coagulation / hemostasis"},
+  {k:"rHandle",t:"Handling and ergonomics"},
+  {k:"rOverall",t:"Overall performance"}
+];
+const EVENTS=["Poor visibility / red-out","Tissue clogging","Over-pressure alarm","Fluid deficit alarm","Fluid leak","Loop / electrode problem","Image loss or video problem","Disposable replaced during case","Converted to reusable resectoscope","Other"];
+const $=s=>document.querySelector(s);
+let me=null,canAdmin=false,records=[],selected=null;
+async function api(path,opt){
+  opt=opt||{};
+  let res;
+  try{res=await fetch("/api/"+path,{credentials:"same-origin",...opt,headers:opt.body?{"content-type":"application/json"}:{}})}
+  catch(_){throw {code:"network"}}
+  if(res.status===401){showAuth("loginForm");throw {code:"unauthorized"}}
+  const data=await res.json().catch(()=>({}));
+  if(!res.ok)throw {code:data.error||"error",status:res.status};
+  return data;
+}
+
+/* ---------- barcode scanning ---------- */
+// GS1 element strings (UDI): (01) GTIN, (10) lot, (21) serial, (17) expiry, (11) production date.
+const GS1_FIXED={"00":18,"01":14,"02":14,"11":6,"12":6,"13":6,"15":6,"16":6,"17":6,"20":2};
+const GS1_VAR=["10","21","22","30","37","240","241","250","251","400","7003"];
+function gs1Date(v){if(!/^\d{6}$/.test(v))return"";let y=2000+ +v.slice(0,2),m=+v.slice(2,4),d=+v.slice(4,6);if(m<1||m>12)return"";if(d===0)d=new Date(y,m,0).getDate();return`${y}-${String(m).padStart(2,"0")}-${String(d).padStart(2,"0")}`}
+function parseGS1(raw){
+  let t=String(raw||"").trim().replace(/^\](d2|C1|Q3|e0|J1)/,"").replace(/^\x1d+/,"");
+  const f={};
+  if(/^\(\d{2,4}\)/.test(t)){
+    const re=/\((\d{2,4})\)([^(]*)/g;let m;while((m=re.exec(t)))f[m[1]]=m[2].replace(/\x1d/g,"").trim();
+  }else{
+    if(!/^\d{2}/.test(t))return null;
+    let i=0,guard=0;
+    while(i<t.length&&guard++<20){
+      if(t[i]==="\x1d"){i++;continue}
+      let ai=t.slice(i,i+2);
+      if(GS1_FIXED[ai]){const v=t.slice(i+2,i+2+GS1_FIXED[ai]);if(v.length<GS1_FIXED[ai])return null;f[ai]=v;i+=2+GS1_FIXED[ai];continue}
+      const va=GS1_VAR.find(a=>t.startsWith(a,i));if(!va)return Object.keys(f).length?f2(f):null;
+      let j=t.indexOf("\x1d",i);if(j<0)j=t.length;f[va]=t.slice(i+va.length,j);i=j;
+    }
+  }
+  return Object.keys(f).length?f2(f):null;
+  function f2(f){const g={gtin:f["01"]||f["02"]||"",lot:f["10"]||"",sn:f["21"]||"",exp:gs1Date(f["17"]||""),prod:gs1Date(f["11"]||"")};return g.gtin||g.lot||g.sn?g:null}
+}
+function cleanRaw(t){return String(t||"").replace(/[\x00-\x1f]/g," ").replace(/\s+/g," ").trim().slice(0,80)}
+function showUdi(row){
+  const el=row.querySelector(".udi"),u=row.udi;el.hidden=!u;if(!u){el.innerHTML="";return}
+  const expired=u.exp&&u.exp<today();
+  el.innerHTML=["Scanned",u.gtin&&"GTIN "+esc(u.gtin),u.lot&&u.sn&&"SN "+esc(u.sn),u.exp&&(expired?'<span class="exp-bad">Expired '+esc(u.exp)+"</span>":"Exp "+esc(u.exp))].filter(Boolean).map(x=>"<span>"+x+"</span>").join("");
+}
+function knownPnForGtin(gtin){
+  if(!gtin)return"";
+  for(const r of records)for(const it of r.items||[])if(it.gtin===gtin&&PRODUCTS.some(p=>p.pn===it.pn&&p.pn!=="OTHER"))return it.pn;
+  return"";
+}
+function applyScanToItem(row,text){
+  const i=row.dataset.i,g=parseGS1(text);
+  if(g){row.udi=g;$("#lot"+i).value=g.lot||g.sn;const pn=knownPnForGtin(g.gtin);if(pn){$("#pn"+i).value=pn;row.querySelector(".other").hidden=true}}
+  else{row.udi={raw:true};$("#lot"+i).value=cleanRaw(text)}
+  showUdi(row);
+}
+let scanLib=null,scanCtl=null,scanCb=null,scanLast="",torchOn=false;
+function loadScanLib(){
+  if(window.AuleaScan)return Promise.resolve();
+  if(!scanLib)scanLib=new Promise((ok,bad)=>{const s=document.createElement("script");s.src="scan.js";s.onload=ok;s.onerror=()=>{scanLib=null;bad()};document.head.appendChild(s)});
+  return scanLib;
+}
+function describeScan(t){
+  const g=parseGS1(t);
+  if(!g)return`<div><span class="k">Read</span><div class="v">${esc(cleanRaw(t))}</div></div>`;
+  return[["Lot",g.lot],["Serial",g.sn],["Expiry",g.exp+(g.exp&&g.exp<today()?" (expired)":"")],["GTIN",g.gtin]].filter(x=>x[1]).map(x=>`<div><span class="k">${x[0]}</span><div class="v">${esc(x[1])}</div></div>`).join("");
+}
+function stopCam(){try{scanCtl&&scanCtl.stop()}catch(_){}scanCtl=null;$("#scanTorch").hidden=true}
+async function startCam(){
+  const msg=$("#scanMsg");msg.textContent="";$("#scanRes").hidden=true;$("#scanUse").hidden=true;$("#scanAgain").hidden=true;$("#vf").hidden=false;$("#scanHint").hidden=false;
+  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){msg.textContent="This browser cannot open the camera. Use Take a photo instead.";$("#vf").hidden=true;return}
+  try{await loadScanLib()}catch(_){msg.textContent="The scanner could not load. Check the connection and try again.";return}
+  try{
+    scanCtl=await AuleaScan.start($("#scanVideo"),t=>{if(!scanCtl)return;stopCam();if(navigator.vibrate)try{navigator.vibrate(60)}catch(_){}gotScan(t)});
+    $("#scanTorch").hidden=!(scanCtl&&scanCtl.switchTorch);
+  }catch(e){
+    $("#vf").hidden=true;
+    msg.textContent=e&&e.name==="NotAllowedError"?"Camera access is blocked for this site. Allow the camera in the browser settings, or use Take a photo instead."
+      :e&&e.name==="NotFoundError"?"No camera was found. Use Take a photo instead.":"The camera could not start. Use Take a photo instead.";
+  }
+}
+function gotScan(t){
+  scanLast=t;$("#vf").hidden=true;$("#scanHint").hidden=true;
+  $("#scanRes").innerHTML=describeScan(t);$("#scanRes").hidden=false;$("#scanUse").hidden=false;$("#scanAgain").hidden=false;
+}
+function openScanner(cb){
+  scanCb=cb;scanLast="";torchOn=false;$("#scanner").hidden=false;document.body.style.overflow="hidden";startCam();
+}
+function closeScanner(){stopCam();$("#scanner").hidden=true;document.body.style.overflow="";scanCb=null}
+$("#scanCancel").onclick=closeScanner;
+$("#scanAgain").onclick=startCam;
+$("#scanUse").onclick=()=>{const cb=scanCb,t=scanLast;closeScanner();if(cb&&t)cb(t)};
+$("#scanTorch").onclick=async()=>{try{torchOn=!torchOn;await scanCtl.switchTorch(torchOn)}catch(_){$("#scanTorch").hidden=true}};
+$("#scanPhoto").onchange=async e=>{
+  const f=e.target.files[0];e.target.value="";if(!f)return;
+  stopCam();const msg=$("#scanMsg");msg.textContent="Reading the photo…";msg.style.color="var(--muted)";
+  try{await loadScanLib();const t=await AuleaScan.decodeFile(f);msg.textContent="";msg.style.color="";gotScan(t)}
+  catch(_){msg.style.color="";msg.textContent="No barcode found in that photo. Move closer so the barcode fills most of the picture, keep it sharp, and try again.";$("#vf").hidden=true}
+};
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!$("#scanner").hidden)closeScanner()});
+
+/* ---------- tabs ---------- */
+function showTab(which){
+  ["form","list","users"].forEach(t=>{$("#tab-"+t).setAttribute("aria-selected",t===which);$("#view-"+t).hidden=t!==which});
+}
+$("#tab-form").onclick=()=>showTab("form");
+$("#tab-list").onclick=()=>{showTab("list");loadData()};
+$("#tab-users").onclick=()=>{showTab("users");loadUsers()};
+function status(text,kind){const s=$("#status");if(!text){s.hidden=true;return}s.textContent=text;s.className="notice"+(kind?" "+kind:"");s.hidden=false}
+
+/* ---------- items ---------- */
+let itemSeq=0;
+function addItem(v){
+  v=v||{};const i=itemSeq++;const row=document.createElement("div");row.className="item";row.dataset.i=i;
+  row.innerHTML=`<div class="field f-pn"><label for="pn${i}">PN / Product<span class="req">*</span></label><select id="pn${i}">${PRODUCTS.map(p=>`<option value="${p.pn}">${p.pn==="OTHER"?"":p.pn+" · "}${p.name}</option>`).join("")}</select></div>
+  <div class="field"><label for="lot${i}">Lot / Serial No.<span class="req">*</span></label><div class="ig"><input type="text" id="lot${i}" class="mono" autocomplete="off" autocapitalize="characters" spellcheck="false"><button type="button" class="btn sm scanbtn" aria-label="Scan barcode for this item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 7V4h3M21 7V4h-3M3 17v3h3M21 17v3h-3M7 8v8M10 8v8M13 8v8M17 8v8"/></svg>Scan</button></div></div>
+  <div class="field"><label for="qty${i}">Qty</label><input type="number" id="qty${i}" min="1" value="1" inputmode="numeric"></div>
+  <button type="button" class="btn ghost danger sm rm" aria-label="Remove item">Remove</button>
+  <div class="field other" hidden><label for="opn${i}">Other PN and description</label><input type="text" id="opn${i}" class="mono" placeholder="PN – description"></div>
+  <div class="udi" id="udi${i}" hidden></div>`;
+  const sel=row.querySelector("select"),oth=row.querySelector(".other");
+  sel.value=v.pn||"2490";oth.hidden=sel.value!=="OTHER";
+  sel.onchange=()=>{oth.hidden=sel.value!=="OTHER"};
+  row.querySelector(".rm").onclick=()=>{if($("#items").children.length>1)row.remove();syncRemove()};
+  row.udi=null;
+  row.querySelector(".scanbtn").onclick=()=>openScanner(text=>applyScanToItem(row,text));
+  row.querySelector("#lot"+i).addEventListener("input",()=>{if(row.udi){row.udi=null;showUdi(row)}});
+  $("#items").appendChild(row);syncRemove();
+}
+function syncRemove(){const rows=[...$("#items").children];rows.forEach(r=>r.querySelector(".rm").hidden=rows.length<2)}
+$("#addItem").onclick=()=>addItem({pn:"1327"});
+
+/* ---------- conditional fields ---------- */
+document.querySelectorAll('input[name=procedure]').forEach(r=>r.onchange=()=>{$("#procedureOther").hidden=val('procedure')!=="Other"});
+$("#ratings").innerHTML=RATINGS.map(q=>`<div class="rate" id="row_${q.k}"><span class="q">${q.t}</span><span class="seg" role="radiogroup" aria-label="${q.t}">${[1,2,3,4,5,"NA"].map(v=>`<label><input type="radio" name="${q.k}" value="${v}">${v==="NA"?"N/A":v}</label>`).join("")}</span></div>`).join("");
+$("#eventsHost").innerHTML=EVENTS.map(e=>`<label><input type="checkbox" name="ev" value="${e}">${e}</label>`).join("");
+const anyEvent=()=>!!document.querySelector('input[name=ev]:checked');
+document.querySelectorAll('input[name=ev]').forEach(c=>c.onchange=()=>{$("#issueNote").hidden=!anyEvent()});
+const UNITS=[
+  {u:"Veloxion 1",m:"Veloxion Controller Kit (PN 2516)"},{u:"Veloxion 2",m:"Veloxion Controller Kit (PN 2516)"},
+  {u:"Darwin 1",m:"MS-301"},{u:"Darwin 2",m:"MS-301"},
+  {u:"FSN 1",m:"FM-E3204DGC 3D monitor"},{u:"FSN 2",m:"FM-E3204DGC 3D monitor"}
+];
+let reg={};
+const isUnit=u=>UNITS.some(x=>x.u===u);
+const snOf=(r,u)=>isUnit(u)?((r&&r.serials&&r.serials[u])||reg[u]||""):"";
+function snHints(){[["snHintDarwin","unitDarwin"],["snHintFSN","unitFSN"]].forEach(([id,n])=>{const u=val(n);$("#"+id).textContent=isUnit(u)?"S/N: "+(reg[u]||"not registered yet"):""})}
+document.querySelectorAll('input[name=unitDarwin],input[name=unitFSN]').forEach(r=>r.onchange=snHints);
+$("#demoSystem").onchange=()=>{const m=/^Veloxion ([12])$/.exec($("#demoSystem").value);if(!m)return;
+  [["unitDarwin","Darwin "+m[1]],["unitFSN","FSN "+m[1]]].forEach(([n,v])=>{const el=document.querySelector(`input[name=${n}][value="${v}"]`);if(el)el.checked=true});snHints()};
+function renderReg(){
+  if($("#regRows").contains(document.activeElement))return;
+  $("#regRows").innerHTML=UNITS.map((x,i)=>`<tr><td class="num">${x.u}</td><td>${x.m}</td><td><div class="ig"><input type="text" id="reg${i}" class="mono" placeholder="Pending" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="${x.u} serial number"><button type="button" class="btn sm scanbtn" data-reg="${i}" aria-label="Scan ${x.u} serial number"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 7V4h3M21 7V4h-3M3 17v3h3M21 17v3h-3M7 8v8M10 8v8M13 8v8M17 8v8"/></svg></button></div></td></tr>`).join("");
+  $("#regRows").querySelectorAll("[data-reg]").forEach(b=>{b.hidden=!canAdmin;b.onclick=()=>openScanner(t=>{const g=parseGS1(t);$("#reg"+b.dataset.reg).value=(g&&(g.sn||g.lot))||t.replace(/[\x00-\x1f]/g,"").trim()})});
+  UNITS.forEach((x,i)=>{$("#reg"+i).value=reg[x.u]||"";$("#reg"+i).disabled=!canAdmin});$("#regSave").hidden=!canAdmin;
+}
+$("#regSave").onclick=async()=>{
+  const msg=$("#regMsg");
+  const units={};UNITS.forEach((x,i)=>{const v=$("#reg"+i).value.trim();if(v)units[x.u]=v});
+  const btn=$("#regSave");btn.disabled=true;msg.textContent="Saving…";
+  try{reg=(await api("equipment",{method:"PUT",body:JSON.stringify({units})})).units;msg.textContent="Saved.";snHints();render()}
+  catch(e){msg.textContent=e&&e.code==="admin_only"?"Only administrators can edit the register.":"Could not save. Try again."}
+  finally{btn.disabled=false}
+};
+$("#why2dHost").innerHTML=WHY_2D.map(e=>`<label><input type="checkbox" name="why2d" value="${e}">${e}</label>`).join("");
+function sync3d(){const on=is3D();$("#row_rDepth").hidden=!on;$("#row3d").hidden=!on;$("#rowMixed").hidden=!isMixed()}
+function renderDisp(){const t=val("scopeType"),n=t==="Rigid"?5:t==="Flexible"?3:0;
+  $("#dispHint").textContent=n?"L1 to L"+n+" for "+t.toLowerCase()+" scopes":"choose the scope type first";
+  $("#dispSeg").innerHTML=Array.from({length:n},(_,i)=>`<label><input type="radio" name="disparity" value="L${i+1}">L${i+1}</label>`).join("")}
+document.querySelectorAll('input[name=viewMode]').forEach(r=>r.onchange=sync3d);
+document.querySelectorAll('input[name=scopeType]').forEach(r=>r.onchange=renderDisp);
+function rv(k){const v=val(k);return v==="NA"?"N/A":v?Number(v):""}
+function val(name){const c=document.querySelector(`input[name=${name}]:checked`);return c?c.value:""}
+
+/* ---------- signature pads ---------- */
+const pads={};
+function makePad(id){
+  const wrap=document.getElementById(id),cv=wrap.querySelector("canvas"),ctx=cv.getContext("2d");
+  const pad={dirty:false,strokes:[]};
+  function size(){const r=cv.getBoundingClientRect(),d=window.devicePixelRatio||1;cv.width=Math.max(1,r.width*d);cv.height=Math.max(1,r.height*d);ctx.setTransform(d,0,0,d,0,0);redraw()}
+  function draw(c,W,H,lw){c.lineCap="round";c.lineJoin="round";c.strokeStyle="#0b1a33";c.lineWidth=lw;
+    pad.strokes.forEach(s=>{c.beginPath();s.forEach((p,k)=>{const x=p[0]*W,y=p[1]*H;k?c.lineTo(x,y):c.moveTo(x,y)});if(s.length===1)c.lineTo(s[0][0]*W+.1,s[0][1]*H);c.stroke()})}
+  function redraw(){const r=cv.getBoundingClientRect();ctx.clearRect(0,0,r.width,r.height);draw(ctx,r.width,r.height,2.4)}
+  let cur=null;
+  function pt(e){const r=cv.getBoundingClientRect();return[Math.min(1,Math.max(0,(e.clientX-r.left)/r.width)),Math.min(1,Math.max(0,(e.clientY-r.top)/r.height))]}
+  cv.addEventListener("pointerdown",e=>{e.preventDefault();try{cv.setPointerCapture(e.pointerId)}catch(_){}cur=[pt(e)];pad.strokes.push(cur);pad.dirty=true;redraw()});
+  cv.addEventListener("pointermove",e=>{if(!cur)return;e.preventDefault();const evs=e.getCoalescedEvents?e.getCoalescedEvents():[e];evs.forEach(ev=>cur.push(pt(ev)));redraw()});
+  const end=()=>{cur=null};cv.addEventListener("pointerup",end);cv.addEventListener("pointercancel",end);
+  cv.addEventListener("touchmove",e=>e.preventDefault(),{passive:false});
+  pad.clear=()=>{pad.strokes=[];pad.dirty=false;redraw()};
+  pad.export=()=>{const W=600,H=240,c=document.createElement("canvas");c.width=W;c.height=H;const x=c.getContext("2d");
+    x.fillStyle="#fff";x.fillRect(0,0,W,H);draw(x,W,H,3.4);return c.toDataURL("image/png")};
+  new ResizeObserver(size).observe(cv);size();
+  pads[id]=pad;
+}
+makePad("padDist");makePad("padHosp");
+document.querySelectorAll("[data-clear]").forEach(b=>b.onclick=()=>pads[b.dataset.clear].clear());
+
+/* ---------- stamp ---------- */
+let stampData="";
+$("#stamp").onchange=e=>{
+  const f=e.target.files[0];if(!f){stampData="";$("#stampPrev").hidden=true;return}
+  const img=new Image(),url=URL.createObjectURL(f);
+  img.onload=()=>{const m=420,s=Math.min(1,m/Math.max(img.width,img.height));const c=document.createElement("canvas");c.width=Math.round(img.width*s);c.height=Math.round(img.height*s);
+    const x=c.getContext("2d");x.fillStyle="#fff";x.fillRect(0,0,c.width,c.height);x.drawImage(img,0,0,c.width,c.height);stampData=c.toDataURL("image/jpeg",.82);
+    $("#stampPrev").src=stampData;$("#stampPrev").hidden=false;URL.revokeObjectURL(url)};
+  img.onerror=()=>{stampData="";$("#formMsg").textContent="That image could not be read. Use a JPG or PNG photo."};
+  img.src=url;
+};
+
+/* ---------- reset ---------- */
+function today(){const d=new Date();return new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,10)}
+function resetForm(){
+  $("#f").reset();$("#items").innerHTML="";addItem();
+  pads.padDist.clear();pads.padHosp.clear();stampData="";$("#stampPrev").hidden=true;
+  $("#procedureOther").hidden=true;$("#issueNote").hidden=true;sync3d();renderDisp();snHints();$("#formMsg").textContent="";
+  $("#useDate").value=today();
+}
+$("#resetBtn").onclick=resetForm;
+
+/* ---------- collect + validate ---------- */
+function collect(){
+  const g=id=>$("#"+id).value.trim();
+  const items=[...$("#items").children].map(r=>{const i=r.dataset.i,pn=$("#pn"+i).value,p=PRODUCTS.find(x=>x.pn===pn);
+    const other=$("#opn"+i).value.trim();
+    const u=r.udi||{};
+    return{pn:pn==="OTHER"?(other||"Other"):pn,name:pn==="OTHER"?"Other":p.name,lot:$("#lot"+i).value.trim(),qty:Math.max(1,parseInt($("#qty"+i).value,10)||1),gtin:u.gtin||"",sn:u.lot&&u.sn?u.sn:"",exp:u.exp||"",scanned:!!r.udi}});
+  return{
+    hospital:g("hospital"),country:$("#country").value,department:g("department"),surgeon:g("surgeon"),useDate:$("#useDate").value,
+    demoSystem:$("#demoSystem").value,procedure:val("procedure")==="Other"?("Other: "+g("procedureOther")):val("procedure"),
+    items,events:[...document.querySelectorAll('input[name=ev]:checked')].map(c=>c.value),issue:anyEvent()?"Yes":"No",issueNote:anyEvent()?g("issueNote"):"",feedback:g("feedback"),
+    experience:val("experience"),viewMode:val("viewMode"),scopeType:is3D()?val("scopeType"):"",disparity:is3D()?val("disparity"):"",share3D:isMixed()?val("share3D"):"",why2D:isMixed()?[...document.querySelectorAll("input[name=why2d]:checked")].map(c=>c.value):[],
+    unitDarwin:val("unitDarwin"),unitFSN:val("unitFSN"),vsOverall:val("vsOverall"),vsTime:val("vsTime"),useAgain:val("useAgain"),procMin:g("procMin")?Number(g("procMin")):"",
+    ratings:Object.fromEntries(RATINGS.map(q=>[q.k,q.k==="rDepth"&&!is3D()?"":rv(q.k)])),
+    distCompany:g("distCompany"),distRep:g("distRep"),hospRep:g("hospRep"),hospTitle:g("hospTitle")
+  };
+}
+function validate(r){
+  const miss=[];
+  if(!r.hospital)miss.push("hospital name");if(!r.surgeon)miss.push("surgeon name");if(!r.useDate)miss.push("date of use");
+  if(r.items.some(it=>!it.lot))miss.push("lot / serial no.");
+  if(!r.distRep)miss.push("distributor representative");if(!pads.padDist.dirty)miss.push("distributor signature");
+  if(!r.hospRep)miss.push("hospital representative");if(!pads.padHosp.dirty)miss.push("hospital signature");
+  return miss;
+}
+
+$("#f").addEventListener("submit",async e=>{
+  e.preventDefault();
+  const r=collect(),miss=validate(r);
+  if(miss.length){$("#formMsg").textContent="Please complete: "+miss.join(", ")+".";return}
+  const btn=$("#submitBtn");btn.disabled=true;btn.textContent="Saving…";$("#formMsg").textContent="";
+  const doc={...r,distSig:pads.padDist.export(),hospSig:pads.padHosp.export(),stamp:stampData};
+  try{
+    const saved=(await api("reports",{method:"POST",body:JSON.stringify(doc)})).report;
+    records=[saved,...records.filter(x=>x.reportNo!==saved.reportNo)];render();
+    resetForm();status("Submitted "+saved.reportNo+". Everyone signed in can now see it under All records.","ok");
+    showTab("list");window.scrollTo({top:0});
+  }catch(err){
+    $("#formMsg").textContent=err&&err.code==="unauthorized"?"Your session ended. Sign in again, then press Submit. Your entries are still here."
+      :err&&err.code==="missing_fields"?"Some required fields are missing. Check hospital, surgeon, date, lot numbers and both signatures."
+      :err&&err.code==="too_large"?"The record is too large. Use a smaller stamp photo."
+      :"Could not save. Check your connection and press Submit again.";
+  }finally{btn.disabled=false;btn.textContent="Submit"}
+});
+
+/* ---------- list ---------- */
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const itemsText=r=>(r.items||[]).map(it=>`${it.pn} × ${it.qty}`).join(", ");
+const issuePill=r=>r.issue==="Yes"?'<span class="pill warn">Event</span>':'<span class="pill ok">No event</span>';
+function equipHtml(r){
+  const kv=[["Veloxion controller",r.demoSystem],["Darwin (MS-301)",r.unitDarwin],["FSN 3D monitor",r.unitFSN]].filter(x=>isUnit(x[1])).map(x=>[x[0],x[1]+" · S/N "+(snOf(r,x[1])||"pending")]);
+  return kv.length?`<dl class="dl">${kv.map(x=>`<div><dt>${esc(x[0])}</dt><dd class="mono">${esc(x[1])}</dd></div>`).join("")}</dl>`:"";
+}
+function feedbackHtml(r){
+  const kv=[["Experience with Veloxion",r.experience],["Visualization",r.viewMode],["Share of case in 3D",r.share3D],["Why 2D was used",(r.why2D||[]).join(", ")],["Scope type on MS-301",r.scopeType],["3D disparity setting",r.disparity],["Vs. reusable resectoscope",r.vsOverall],["Procedure time vs. reusable",r.vsTime],["Total procedure time",r.procMin?r.procMin+" min":""],["Would use again",r.useAgain]].filter(x=>x[1]);
+  const rt=RATINGS.filter(q=>r.ratings&&r.ratings[q.k]!==""&&r.ratings[q.k]!=null);
+  const ev=r.events||[];
+  return `<div><div class="lbl" style="margin-bottom:6px">Surgeon feedback</div>`+
+    (kv.length?`<dl class="dl">${kv.map(x=>`<div><dt>${esc(x[0])}</dt><dd>${esc(x[1])}</dd></div>`).join("")}</dl>`:"")+
+    (rt.length?`<div class="lines" style="margin-top:10px">${rt.map(q=>`<div class="line" style="grid-template-columns:minmax(0,1fr) auto"><span>${esc(q.t)}</span><span class="mono">${esc(r.ratings[q.k])}${r.ratings[q.k]==="N/A"?"":" / 5"}</span></div>`).join("")}</div>`:"")+
+    `<dl class="dl" style="margin-top:10px"><div><dt>Events</dt><dd>${ev.length?ev.map(e=>`<span class="pill warn">${esc(e)}</span>`).join(" "):"None reported"}${r.issueNote?`<div>${esc(r.issueNote)}</div>`:""}</dd></div><div><dt>Comments</dt><dd>${esc(r.feedback||"—")}</dd></div></dl></div>`;
+}
+function filtered(){const q=$("#q").value.trim().toLowerCase();if(!q)return records;
+  return records.filter(r=>[r.reportNo,r.hospital,r.surgeon,r.country,r.procedure,r.distRep,r.hospRep,r.demoSystem,r.unitDarwin,r.unitFSN,snOf(r,r.demoSystem),snOf(r,r.unitDarwin),snOf(r,r.unitFSN),...(r.items||[]).flatMap(i=>[i.pn,i.lot])].join(" ").toLowerCase().includes(q))}
+function render(){
+  $("#count").textContent=records.length;
+  const tot={};records.forEach(r=>(r.items||[]).forEach(it=>{tot[it.pn]=(tot[it.pn]||0)+it.qty}));
+  const issues=records.filter(r=>r.issue==="Yes").length;
+  const ov=records.map(r=>r.ratings&&r.ratings.rOverall).filter(v=>typeof v==="number");
+  $("#summary").innerHTML=`<span class="chip"><b>Records</b> ${records.length}</span>`+
+    `<span class="chip"><b>Planned demo sets</b> ${PLANNED_SETS}</span>`+
+    Object.keys(tot).sort().map(pn=>`<span class="chip"><b>PN ${esc(pn)}</b> ${tot[pn]}</span>`).join("")+
+    `<span class="chip"><b>Cases with events</b> ${issues}</span>`+(ov.length?`<span class="chip"><b>Avg overall</b> ${(ov.reduce((a,b)=>a+b,0)/ov.length).toFixed(1)} / 5</span>`:"");
+  const list=filtered();
+  $("#rows").innerHTML=list.map(r=>`<tr data-id="${esc(r.reportNo)}"><td class="num">${esc(r.reportNo)}</td><td class="num">${esc(r.useDate)}</td><td>${esc(r.hospital)}${r.country?`<div class="hint">${esc(r.country)}</div>`:""}</td><td>${esc(r.surgeon)}</td><td>${esc(r.procedure||"—")}</td><td class="num">${esc(itemsText(r))}</td><td>${issuePill(r)}</td></tr>`).join("");
+  $("#cards").innerHTML=list.map(r=>`<button type="button" class="card" data-id="${esc(r.reportNo)}"><span class="row1"><span class="h">${esc(r.hospital)}</span>${issuePill(r)}</span><span class="meta">${esc(r.useDate)} · ${esc(r.surgeon)}${r.procedure?" · "+esc(r.procedure):""}</span><span class="prod">${esc(itemsText(r))}</span><span class="no">${esc(r.reportNo)}</span></button>`).join("");
+  const none=list.length===0;
+  $("#empty").hidden=!none;$("#tableWrap").hidden=none;
+  $("#empty").innerHTML=records.length&&none?"<strong>No match</strong>Try another keyword."
+    :"<strong>No records yet</strong>Submitted records appear here for everyone. Fill in the first one on the New record tab.";
+  document.querySelectorAll("#rows tr,#cards .card").forEach(el=>el.onclick=()=>openDetail(el.dataset.id));
+  if(selected&&!records.find(r=>r.reportNo===selected))closeDetail();
+}
+$("#q").oninput=render;
+
+async function openDetail(id){
+  const r=records.find(x=>x.reportNo===id);if(!r)return;selected=id;
+  const filler=r.createdBy||"";
+  const d=$("#detail");d.hidden=false;
+  d.innerHTML=`<div class="detail">
+    <div style="display:flex;justify-content:space-between;gap:10px;align-items:center"><h2>${esc(r.reportNo)}</h2><button type="button" class="btn ghost sm" id="closeD">Close</button></div>
+    <dl class="dl">
+      <div><dt>Hospital</dt><dd>${esc(r.hospital)}</dd></div><div><dt>Country</dt><dd>${esc(r.country||"—")}</dd></div>
+      <div><dt>Department</dt><dd>${esc(r.department||"—")}</dd></div><div><dt>Surgeon</dt><dd>${esc(r.surgeon)}</dd></div>
+      <div><dt>Date of use</dt><dd class="mono">${esc(r.useDate)}</dd></div><div><dt>Procedure</dt><dd>${esc(r.procedure||"—")}</dd></div>
+      <div><dt>Demo system</dt><dd>${esc(r.demoSystem||"—")}</dd></div><div><dt>Submitted</dt><dd class="mono">${esc((r.createdAt||"").replace("T"," ").slice(0,16))} UTC${filler?" · "+esc(filler):""}</dd></div>
+    </dl>
+    <div><div class="lbl" style="margin-bottom:6px">Products</div><div class="lines">${(r.items||[]).map(it=>`<div class="line"><span class="mono">${esc(it.pn)}</span><span>${esc(it.name)}</span><span class="mono">× ${esc(it.qty)}</span><span class="lot">Lot ${esc(it.lot)}${it.sn?" · SN "+esc(it.sn):""}${it.exp?" · Exp "+esc(it.exp):""}${it.gtin?" · GTIN "+esc(it.gtin):""}${it.scanned?" · scanned":""}</span></div>`).join("")}</div></div>
+    ${equipHtml(r)}
+    ${feedbackHtml(r)}
+    <div class="sigs">
+      <div class="sigbox"><div class="lbl">Distributor · ${esc(r.distCompany||"")}</div><img class="sigimg" src="${esc(r.distSig)}" alt="Distributor signature"><div>${esc(r.distRep)}</div></div>
+      <div class="sigbox"><div class="lbl">Hospital</div><img class="sigimg" src="${esc(r.hospSig)}" alt="Hospital signature"><div>${esc(r.hospRep)}${r.hospTitle?", "+esc(r.hospTitle):""}</div></div>
+      ${r.stamp?`<div class="sigbox"><div class="lbl">Company stamp</div><img class="sigimg" src="${esc(r.stamp)}" alt="Company stamp" style="max-width:160px"></div>`:""}
+    </div>
+    ${canAdmin?`<div class="confirm" id="delWrap"><button type="button" class="btn sm danger" id="delBtn">Delete record</button></div>`:""}
+  </div>`;
+  $("#closeD").onclick=closeDetail;
+  const del=$("#delBtn");
+  if(del)del.onclick=()=>{$("#delWrap").innerHTML=`<span>Delete ${esc(r.reportNo)} for everyone?</span><button type="button" class="btn sm danger" id="delYes">Delete</button><button type="button" class="btn sm" id="delNo">Cancel</button>`;
+    $("#delNo").onclick=()=>openDetail(id);
+    $("#delYes").onclick=async()=>{try{await api("reports/"+encodeURIComponent(id),{method:"DELETE"});records=records.filter(x=>x.reportNo!==id);render();closeDetail();status("Deleted "+id+".")}catch(_){status("Could not delete. Try again.","warn")}}};
+  d.scrollIntoView({behavior:"smooth",block:"start"});
+}
+function closeDetail(){selected=null;$("#detail").hidden=true;$("#detail").innerHTML=""}
+
+/* ---------- Excel ---------- */
+$("#xlsxBtn").onclick=async()=>{
+  if(!records.length){status("There are no records to export yet.","warn");return}
+  if(!window.ExcelJS){status("The Excel library did not load. Reload the page and try again.","warn");return}
+  const btn=$("#xlsxBtn");btn.disabled=true;btn.textContent="Building…";
+  try{
+    const wb=new ExcelJS.Workbook();wb.creator="MedicalTek";wb.created=new Date();
+    const ws=wb.addWorksheet("Usage Records",{views:[{state:"frozen",ySplit:1}]});
+    ws.columns=[
+      {header:"Report No.",key:"reportNo",width:22},{header:"Date of Use",key:"useDate",width:12},{header:"Hospital",key:"hospital",width:28},
+      {header:"Country",key:"country",width:12},{header:"Department",key:"department",width:14},{header:"Surgeon",key:"surgeon",width:20},
+      {header:"Procedure",key:"procedure",width:16},{header:"Veloxion Demo System",key:"demoSystem",width:12},{header:"Veloxion Controller S/N",key:"snV",width:16},{header:"Darwin Unit",key:"unitDarwin",width:10},{header:"Darwin (MS-301) S/N",key:"snD",width:16},{header:"FSN Unit",key:"unitFSN",width:9},{header:"FSN Monitor S/N",key:"snF",width:16},{header:"Products (PN / Lot / Qty)",key:"products",width:40},
+      {header:"Experience with Veloxion",key:"experience",width:14},{header:"Visualization",key:"viewMode",width:12},{header:"Share of Case in 3D",key:"share3D",width:11},{header:"Why 2D Was Used",key:"why2Dtxt",width:26},{header:"Scope Type on MS-301",key:"scopeType",width:11},{header:"3D Disparity Setting",key:"disparity",width:10},...RATINGS.map(q=>({header:"Rating (1-5): "+q.t,key:q.k,width:13})),{header:"Vs. Reusable (Overall)",key:"vsOverall",width:12},{header:"Procedure Time vs. Reusable",key:"vsTime",width:12},{header:"Procedure Time (min)",key:"procMin",width:10},{header:"Would Use Again",key:"useAgain",width:10},{header:"Events",key:"events",width:30},{header:"Event Note",key:"issueNote",width:30},{header:"Comments",key:"feedback",width:36},
+      {header:"Distributor",key:"distCompany",width:22},{header:"Distributor Rep",key:"distRep",width:18},{header:"Distributor Signature",key:"s1",width:22},
+      {header:"Hospital Rep",key:"hospRep",width:18},{header:"Hospital Rep Title",key:"hospTitle",width:16},{header:"Hospital Signature",key:"s2",width:22},
+      {header:"Company Stamp",key:"s3",width:16},{header:"Submitted At (UTC)",key:"createdAt",width:18}
+    ];
+    const hdr=ws.getRow(1);hdr.font={bold:true,color:{argb:"FFFFFFFF"}};hdr.fill={type:"pattern",pattern:"solid",fgColor:{argb:"FF0F6E66"}};hdr.alignment={vertical:"middle",wrapText:true};hdr.height=44;const ci=k=>ws.getColumn(k).number-1;
+    const sorted=[...records].sort((a,b)=>(a.useDate||"").localeCompare(b.useDate||""));
+    sorted.forEach((r,idx)=>{
+      const row=ws.addRow({...r,...(r.ratings||{}),events:(r.events||[]).join("; "),why2Dtxt:(r.why2D||[]).join("; "),snV:snOf(r,r.demoSystem),snD:snOf(r,r.unitDarwin),snF:snOf(r,r.unitFSN),products:(r.items||[]).map(it=>`${it.pn} ${it.name} / Lot ${it.lot} / x${it.qty}`).join("\n"),createdAt:(r.createdAt||"").replace("T"," ").slice(0,16)});
+      row.height=48;row.alignment={vertical:"top",wrapText:true};
+      const put=(data,col,w,h)=>{if(!data||!data.startsWith("data:image"))return;const ext=data.startsWith("data:image/png")?"png":"jpeg";
+        const id=wb.addImage({base64:data,extension:ext});ws.addImage(id,{tl:{col:col+0.05,row:idx+1+0.08},ext:{width:w,height:h},editAs:"oneCell"})};
+      put(r.distSig,ci("s1"),115,46);put(r.hospSig,ci("s2"),115,46);put(r.stamp,ci("s3"),60,46);
+    });
+    const ws2=wb.addWorksheet("Product Lines",{views:[{state:"frozen",ySplit:1}]});
+    ws2.columns=[{header:"Report No.",key:"no",width:22},{header:"Date of Use",key:"d",width:12},{header:"Hospital",key:"h",width:28},{header:"Surgeon",key:"s",width:20},{header:"PN",key:"pn",width:10},{header:"Product",key:"name",width:30},{header:"Lot / Serial",key:"lot",width:18},{header:"Qty",key:"qty",width:6},{header:"Serial (UDI)",key:"sn",width:16},{header:"Expiry",key:"exp",width:11},{header:"GTIN",key:"gtin",width:16},{header:"Entry",key:"how",width:9}];
+    const h2=ws2.getRow(1);h2.font={bold:true,color:{argb:"FFFFFFFF"}};h2.fill={type:"pattern",pattern:"solid",fgColor:{argb:"FF0F6E66"}};
+    sorted.forEach(r=>(r.items||[]).forEach(it=>ws2.addRow({no:r.reportNo,d:r.useDate,h:r.hospital,s:r.surgeon,pn:it.pn,name:it.name,lot:it.lot,qty:it.qty,sn:it.sn||"",exp:it.exp||"",gtin:it.gtin||"",how:it.scanned?"Scanned":"Typed"})));
+    ws2.autoFilter={from:"A1",to:"L1"};ws.autoFilter={from:{row:1,column:1},to:{row:1,column:ws.columns.length}};
+    const ws3=wb.addWorksheet("Equipment Register");
+    ws3.columns=[{header:"Unit",key:"u",width:14},{header:"Model",key:"m",width:36},{header:"Serial No.",key:"sn",width:22}];
+    const h3=ws3.getRow(1);h3.font={bold:true,color:{argb:"FFFFFFFF"}};h3.fill={type:"pattern",pattern:"solid",fgColor:{argb:"FF0F6E66"}};
+    UNITS.forEach(x=>ws3.addRow({u:x.u,m:x.m,sn:reg[x.u]||"Pending"}));
+    const buf=await wb.xlsx.writeBuffer();
+    const name="Aulea_Usage_Records_"+today()+".xlsx";
+    const url=URL.createObjectURL(new Blob([buf],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"}));
+    const a=document.createElement("a");a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),10000);
+    status("Excel file created: "+name,"ok");
+  }catch(err){
+    if(!(err&&err.code==="declined"))status("Could not create the Excel file. Try again.","warn");
+  }finally{btn.disabled=false;btn.textContent="Download Excel"}
+};
+
+/* ---------- boot ---------- */
+renderReg();resetForm();
+/* ---------- users (admin) ---------- */
+let users=[],meId="",uConfirm=null;
+const fmtDate=d=>d?String(d).replace("T"," ").slice(0,16)+" UTC":"never";
+function showPw(email,pw){
+  const b=$("#uPwBox");b.hidden=false;
+  b.innerHTML=`<div><b>${esc(email)}</b></div><div class="hint">Password (shown once, copy it now):</div><code id="uPwText">${esc(pw)}</code><div class="acts" style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="btn sm" id="uCopy">Copy email and password</button><button type="button" class="btn ghost sm" id="uPwClose">Done</button></div>`;
+  $("#uCopy").onclick=async()=>{const t="Aulea Device Usage Record\n"+location.origin+"\nEmail: "+email+"\nPassword: "+pw;
+    try{await navigator.clipboard.writeText(t);$("#uCopy").textContent="Copied"}catch(_){const r=document.createRange();r.selectNodeContents($("#uPwText"));const sel=getSelection();sel.removeAllRanges();sel.addRange(r)}};
+  $("#uPwClose").onclick=()=>{b.hidden=true;b.innerHTML=""};
+  b.scrollIntoView({behavior:"smooth",block:"nearest"});
+}
+function renderUsers(){
+  $("#uCount").textContent="("+users.length+")";
+  $("#uRows").innerHTML=users.map(u=>{const self=u.id===meId;const conf=uConfirm&&uConfirm.id===u.id?uConfirm.kind:"";
+    return `<div class="urow" data-id="${esc(u.id)}"><div class="top"><span class="em">${esc(u.email)}${self?" (you)":""}</span><span>${u.isAdmin?'<span class="pill ok">Admin</span>':""} ${u.tempPassword?'<span class="pill warn">Temporary password</span>':""}</span></div>
+    <div class="meta">Added ${esc(fmtDate(u.createdAt))} · Last sign-in ${esc(fmtDate(u.lastSignInAt))}</div>
+    <div class="acts">${conf==="remove"?`<span>Remove ${esc(u.email)}? Their records stay.</span><button type="button" class="btn sm danger" data-act="removeYes">Remove</button><button type="button" class="btn sm" data-act="cancel">Cancel</button>`
+      :conf==="reset"?`<span>Create a new password for ${esc(u.email)}?</span><button type="button" class="btn sm primary" data-act="resetYes">Create</button><button type="button" class="btn sm" data-act="cancel">Cancel</button>`
+      :`<button type="button" class="btn sm" data-act="reset">New password</button>${self?"":`<button type="button" class="btn sm" data-act="${u.isAdmin?"demote":"promote"}">${u.isAdmin?"Remove admin":"Make admin"}</button><button type="button" class="btn sm danger" data-act="remove">Remove user</button>`}`}</div></div>`}).join("")||'<div class="empty">No users yet.</div>';
+  $("#uRows").querySelectorAll("button[data-act]").forEach(b=>b.onclick=()=>userAct(b.closest(".urow").dataset.id,b.dataset.act,b));
+}
+async function loadUsers(){
+  if(!canAdmin)return;
+  try{const d=await api("users");users=d.users||[];meId=d.me||"";renderUsers()}
+  catch(e){if(e.code==="admin_only"){canAdmin=false;$("#tab-users").hidden=true;showTab("form")}else if(e.code!=="unauthorized")$("#uRows").innerHTML='<div class="empty">The user list could not be loaded. Open the Users tab again.</div>'}
+}
+async function userAct(id,act,btn){
+  const u=users.find(x=>x.id===id);if(!u)return;
+  if(act==="cancel"){uConfirm=null;renderUsers();return}
+  if(act==="remove"||act==="reset"){uConfirm={id,kind:act};renderUsers();return}
+  btn.disabled=true;
+  try{
+    if(act==="removeYes"){await api("users/"+encodeURIComponent(id),{method:"DELETE"});users=users.filter(x=>x.id!==id);status("Removed "+u.email+". They can no longer sign in.","ok")}
+    else if(act==="resetYes"){const d=await api("users/"+encodeURIComponent(id),{method:"PATCH",body:JSON.stringify({action:"reset_password"})});users=users.map(x=>x.id===id?d.user:x);showPw(u.email,d.password)}
+    else{const d=await api("users/"+encodeURIComponent(id),{method:"PATCH",body:JSON.stringify({action:"set_admin",isAdmin:act==="promote"})});users=users.map(x=>x.id===id?d.user:x)}
+  }catch(e){if(e.code!=="unauthorized")status(e.code==="self"?"You cannot remove yourself or your own admin role.":"That change could not be saved. Try again.","warn")}
+  uConfirm=null;renderUsers();
+}
+$("#uAddForm").addEventListener("submit",async e=>{
+  e.preventDefault();const msg=$("#uMsg"),email=$("#uEmail").value.trim();msg.textContent="";
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){msg.textContent="Enter a valid email address.";return}
+  const btn=$("#uAddBtn");btn.disabled=true;btn.textContent="Adding…";
+  try{const d=await api("users",{method:"POST",body:JSON.stringify({email,isAdmin:$("#uAdmin").checked})});
+    users=[...users,d.user].sort((a,b)=>a.email.localeCompare(b.email));renderUsers();$("#uEmail").value="";$("#uAdmin").checked=false;showPw(d.user.email,d.password)}
+  catch(e){if(e.code!=="unauthorized")msg.textContent=e.code==="exists_or_failed"?"That email already has an account, or the account could not be created.":e.code==="bad_email"?"Enter a valid email address.":"Could not add the user. Try again."}
+  finally{btn.disabled=false;btn.textContent="Add user"}
+});
+
+function showAuth(which){
+  $("#authView").hidden=false;$("#appView").hidden=true;$("#userBox").hidden=true;
+  ["authLoading","loginForm","pwForm"].forEach(id=>{$("#"+id).hidden=id!==which});
+}
+async function loadData(){
+  try{const [a,b]=await Promise.all([api("reports"),api("equipment")]);records=a.reports||[];reg=b.units||{};renderReg();snHints();render();
+    if(/could not be loaded/.test($("#status").textContent))status("")}
+  catch(e){if(e.code!=="unauthorized")status("Records could not be loaded. Check your connection, then open All records again.","warn")}
+}
+async function enterApp(){
+  try{me=await api("me")}
+  catch(e){if(e.code!=="unauthorized"){showAuth("loginForm");$("#loginMsg").textContent="The server could not be reached. Try again in a moment."}return false}
+  canAdmin=!!me.isAdmin;$("#userEmail").textContent=me.email+(canAdmin?" (admin)":"");
+  $("#tab-users").hidden=!canAdmin;if(!canAdmin&&!$("#view-users").hidden)showTab("form");
+  if(me.tempPassword){openPw("temp");return true}
+  $("#authView").hidden=true;$("#appView").hidden=false;$("#userBox").hidden=false;
+  renderReg();loadData();return true;
+}
+let pwMode=null;
+function openPw(type,token){
+  pwMode={type,token};
+  const t={invite:["Welcome. Set your password","At least 8 characters."],recovery:["Choose a new password","At least 8 characters."],
+    temp:["Choose your own password","You signed in with a password from the administrator. Choose your own to continue. At least 8 characters."],
+    change:["Change password","At least 8 characters."]}[type];
+  $("#pwTitle").textContent=t[0];$("#pwHint").textContent=t[1];$("#pwMsg").textContent="";
+  $("#pwCancel").hidden=type!=="change";
+  showAuth("pwForm");if(type==="temp"||type==="change")$("#userBox").hidden=false;
+}
+$("#changePw").onclick=()=>openPw("change");
+$("#pwCancel").onclick=()=>{$("#newPw").value="";$("#newPw2").value="";pwMode=null;$("#authView").hidden=true;$("#appView").hidden=false;$("#userBox").hidden=false};
+$("#loginForm").addEventListener("submit",async e=>{
+  e.preventDefault();const msg=$("#loginMsg");msg.className="msg";msg.textContent="";
+  const email=$("#loginEmail").value.trim(),pw=$("#loginPw").value;
+  if(!email||!pw){msg.textContent="Enter your email and password.";return}
+  const btn=$("#loginBtn");btn.disabled=true;btn.textContent="Signing in…";
+  try{await NAuth.login(email,pw);$("#loginPw").value="";if(!(await enterApp())&&!msg.textContent)msg.textContent="Signed in, but the session was not accepted. Reload the page and try again."}
+  catch(_){msg.textContent="Email or password is not correct."}
+  finally{btn.disabled=false;btn.textContent="Sign in"}
+});
+$("#forgotBtn").onclick=async()=>{
+  const msg=$("#loginMsg"),email=$("#loginEmail").value.trim();msg.className="msg";
+  if(!email){msg.textContent="Enter your email above first, then press Forgot password.";return}
+  try{await NAuth.requestPasswordRecovery(email)}catch(_){}
+  msg.className="msg ok";msg.textContent="If that email has an account, a reset link is on its way.";
+};
+$("#pwForm").addEventListener("submit",async e=>{
+  e.preventDefault();const msg=$("#pwMsg");msg.textContent="";
+  const p1=$("#newPw").value,p2=$("#newPw2").value;
+  if(p1.length<8){msg.textContent="Use at least 8 characters.";return}
+  if(p1!==p2){msg.textContent="The two passwords do not match.";return}
+  const btn=$("#pwBtn");btn.disabled=true;
+  try{
+    if(pwMode&&pwMode.type==="invite")await NAuth.acceptInvite(pwMode.token,p1);else await NAuth.updateUser({password:p1,data:{temp_password:false}});
+    const wasChange=pwMode&&pwMode.type==="change";
+    pwMode=null;$("#newPw").value="";$("#newPw2").value="";
+    if(!(await enterApp()))showAuth("loginForm");else if(wasChange)status("Password changed.","ok");
+  }catch(_){msg.textContent=pwMode&&(pwMode.type==="change"||pwMode.type==="temp")?"Could not save the password. Sign out, sign in again and retry.":"Could not save the password. The link may have expired. Ask for a new one."}
+  finally{btn.disabled=false}
+});
+$("#signOut").onclick=async()=>{try{await NAuth.logout()}catch(_){}records=[];reg={};me=null;canAdmin=false;users=[];$("#uRows").innerHTML="";$("#uPwBox").hidden=true;$("#tab-users").hidden=true;showTab("form");render();closeDetail();status("");showAuth("loginForm")};
+(async()=>{
+  if(!window.NAuth){showAuth("loginForm");$("#loginMsg").textContent="Sign-in could not load. Reload the page.";return}
+  let cb=null;
+  try{cb=await NAuth.handleAuthCallback()}
+  catch(_){showAuth("loginForm");$("#loginMsg").textContent="That link is no longer valid. Ask for a new one.";return}
+  if(cb&&cb.type==="invite"&&cb.token){openPw("invite",cb.token);return}
+  if(cb&&cb.type==="recovery"){openPw("recovery");return}
+  let u=null;try{u=await NAuth.getUser()}catch(_){}
+  if(u)await enterApp();else showAuth("loginForm");
+})();
+})();
+</script>
+</body>
+</html>
