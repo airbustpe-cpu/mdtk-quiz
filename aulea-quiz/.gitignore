@@ -1,0 +1,4 @@
+node_modules
+.netlify
+public/auth.js
+public/exceljs.min.js
