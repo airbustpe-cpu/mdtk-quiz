@@ -157,6 +157,26 @@ footer.src{font-size:.74rem;color:var(--muted);border-top:1px solid var(--line);
 .docno{text-align:right;display:flex;flex-direction:column;gap:2px}
 #userBox{font-family:var(--f-body);font-size:.8rem;word-break:break-all}
 .users{display:flex;flex-direction:column;gap:14px}
+.ig{display:flex;gap:6px;min-width:0}
+.ig input{flex:1;min-width:0}
+.scanbtn{flex:none;padding:8px 12px;gap:6px}
+.scanbtn svg{width:20px;height:20px}
+.udi{grid-column:1 / -1;font-family:var(--f-mono);font-size:.78rem;color:var(--muted);display:flex;flex-wrap:wrap;gap:4px 12px}
+.udi .exp-bad{color:var(--danger);font-weight:600;font-family:var(--f-body)}
+.scanov{position:fixed;inset:0;z-index:50;background:rgba(5,12,11,.88);display:flex;align-items:center;justify-content:center;
+  padding:max(12px,env(safe-area-inset-top,0px)) max(12px,env(safe-area-inset-right,0px)) max(12px,env(safe-area-inset-bottom,0px)) max(12px,env(safe-area-inset-left,0px))}
+.scanbox{width:100%;max-width:520px;background:var(--surface);border-radius:var(--r);padding:14px;display:flex;flex-direction:column;gap:10px;max-height:100%;overflow:auto}
+.scanbox h2{margin:0;font-family:var(--f-display);font-size:1rem}
+.viewfinder{position:relative;width:100%;aspect-ratio:4 / 3;background:#000;border-radius:4px;overflow:hidden}
+.viewfinder video{width:100%;height:100%;object-fit:cover;display:block}
+.viewfinder .frame{position:absolute;inset:22% 18%;border:2px solid #7fe0d4;border-radius:6px;box-shadow:0 0 0 999px rgba(0,0,0,.28);pointer-events:none}
+.scanrow{display:flex;flex-wrap:wrap;gap:8px}
+.scanrow .btn{flex:1 1 auto}
+.scanmsg{font-size:.86rem;color:var(--danger)}
+.scanmsg:empty{display:none}
+.scanres{border:1px solid var(--ok);background:var(--ok-soft);border-radius:4px;padding:10px 12px;font-size:.88rem;display:flex;flex-direction:column;gap:4px}
+.scanres .k{color:var(--muted);font-size:.75rem;text-transform:uppercase;letter-spacing:.04em}
+.scanres .v{font-family:var(--f-mono);word-break:break-all}
 .uadd{border:1px solid var(--line);background:var(--surface);border-radius:var(--r);padding:16px;display:flex;flex-direction:column;gap:12px}
 .uadd h2,.ulist h2{margin:0;font-family:var(--f-display);font-size:1rem}
 .uadd .row{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end}
@@ -190,7 +210,7 @@ footer.src{font-size:.74rem;color:var(--muted);border-top:1px solid var(--line);
       <div class="sub">Veloxion demo &amp; clinical evaluation, SEA. One record per case.</div>
       </div>
     </div>
-    <div class="docno"><div>Form AUL-SEA-UR · Rev. 10</div><div id="userBox" hidden><span id="userEmail"></span> · <button type="button" class="linkbtn" id="changePw" style="display:inline;padding:0">Change password</button> · <button type="button" class="linkbtn" id="signOut" style="display:inline;padding:0">Sign out</button></div></div>
+    <div class="docno"><div>Form AUL-SEA-UR · Rev. 11</div><div id="userBox" hidden><span id="userEmail"></span> · <button type="button" class="linkbtn" id="changePw" style="display:inline;padding:0">Change password</button> · <button type="button" class="linkbtn" id="signOut" style="display:inline;padding:0">Sign out</button></div></div>
   </header>
 
   <section id="authView" class="auth">
@@ -432,6 +452,24 @@ footer.src{font-size:.74rem;color:var(--muted);border-top:1px solid var(--line);
 
   </div>
 
+  <div class="scanov" id="scanner" hidden role="dialog" aria-modal="true" aria-labelledby="scanTitle">
+    <div class="scanbox">
+      <h2 id="scanTitle">Scan barcode</h2>
+      <div class="viewfinder" id="vf"><video id="scanVideo" playsinline muted autoplay></video><div class="frame"></div></div>
+      <div class="hint" id="scanHint">Hold the label flat and fill the box with the barcode. Data Matrix and linear barcodes both work.</div>
+      <div class="scanres" id="scanRes" hidden></div>
+      <span class="scanmsg" id="scanMsg"></span>
+      <div class="scanrow">
+        <button type="button" class="btn primary" id="scanUse" hidden>Use this</button>
+        <button type="button" class="btn" id="scanAgain" hidden>Scan again</button>
+        <button type="button" class="btn" id="scanTorch" hidden>Light</button>
+        <label class="btn" for="scanPhoto">Take a photo instead</label>
+        <input type="file" id="scanPhoto" accept="image/*" capture="environment" hidden>
+        <button type="button" class="btn ghost" id="scanCancel">Cancel</button>
+      </div>
+    </div>
+  </div>
+
   <footer class="src">Form items agreed between MedicalTek and Aulea, "Demo / clinical evaluation report for Veloxion disposables in SEA", 16–18 Nov 2026. Feedback items follow the outcome measures of the registered Veloxion study NCT07728071 (visibility, setup, case flow, procedure time vs. reusable).</footer>
 </div>
 <script src="auth.js"></script>
@@ -474,6 +512,92 @@ async function api(path,opt){
   return data;
 }
 
+/* ---------- barcode scanning ---------- */
+// GS1 element strings (UDI): (01) GTIN, (10) lot, (21) serial, (17) expiry, (11) production date.
+const GS1_FIXED={"00":18,"01":14,"02":14,"11":6,"12":6,"13":6,"15":6,"16":6,"17":6,"20":2};
+const GS1_VAR=["10","21","22","30","37","240","241","250","251","400","7003"];
+function gs1Date(v){if(!/^\d{6}$/.test(v))return"";let y=2000+ +v.slice(0,2),m=+v.slice(2,4),d=+v.slice(4,6);if(m<1||m>12)return"";if(d===0)d=new Date(y,m,0).getDate();return`${y}-${String(m).padStart(2,"0")}-${String(d).padStart(2,"0")}`}
+function parseGS1(raw){
+  let t=String(raw||"").trim().replace(/^\](d2|C1|Q3|e0|J1)/,"").replace(/^\x1d+/,"");
+  const f={};
+  if(/^\(\d{2,4}\)/.test(t)){
+    const re=/\((\d{2,4})\)([^(]*)/g;let m;while((m=re.exec(t)))f[m[1]]=m[2].replace(/\x1d/g,"").trim();
+  }else{
+    if(!/^\d{2}/.test(t))return null;
+    let i=0,guard=0;
+    while(i<t.length&&guard++<20){
+      if(t[i]==="\x1d"){i++;continue}
+      let ai=t.slice(i,i+2);
+      if(GS1_FIXED[ai]){const v=t.slice(i+2,i+2+GS1_FIXED[ai]);if(v.length<GS1_FIXED[ai])return null;f[ai]=v;i+=2+GS1_FIXED[ai];continue}
+      const va=GS1_VAR.find(a=>t.startsWith(a,i));if(!va)return Object.keys(f).length?f2(f):null;
+      let j=t.indexOf("\x1d",i);if(j<0)j=t.length;f[va]=t.slice(i+va.length,j);i=j;
+    }
+  }
+  return Object.keys(f).length?f2(f):null;
+  function f2(f){const g={gtin:f["01"]||f["02"]||"",lot:f["10"]||"",sn:f["21"]||"",exp:gs1Date(f["17"]||""),prod:gs1Date(f["11"]||"")};return g.gtin||g.lot||g.sn?g:null}
+}
+function cleanRaw(t){return String(t||"").replace(/[\x00-\x1f]/g," ").replace(/\s+/g," ").trim().slice(0,80)}
+function showUdi(row){
+  const el=row.querySelector(".udi"),u=row.udi;el.hidden=!u;if(!u){el.innerHTML="";return}
+  const expired=u.exp&&u.exp<today();
+  el.innerHTML=["Scanned",u.gtin&&"GTIN "+esc(u.gtin),u.lot&&u.sn&&"SN "+esc(u.sn),u.exp&&(expired?'<span class="exp-bad">Expired '+esc(u.exp)+"</span>":"Exp "+esc(u.exp))].filter(Boolean).map(x=>"<span>"+x+"</span>").join("");
+}
+function knownPnForGtin(gtin){
+  if(!gtin)return"";
+  for(const r of records)for(const it of r.items||[])if(it.gtin===gtin&&PRODUCTS.some(p=>p.pn===it.pn&&p.pn!=="OTHER"))return it.pn;
+  return"";
+}
+function applyScanToItem(row,text){
+  const i=row.dataset.i,g=parseGS1(text);
+  if(g){row.udi=g;$("#lot"+i).value=g.lot||g.sn;const pn=knownPnForGtin(g.gtin);if(pn){$("#pn"+i).value=pn;row.querySelector(".other").hidden=true}}
+  else{row.udi={raw:true};$("#lot"+i).value=cleanRaw(text)}
+  showUdi(row);
+}
+let scanLib=null,scanCtl=null,scanCb=null,scanLast="",torchOn=false;
+function loadScanLib(){
+  if(window.AuleaScan)return Promise.resolve();
+  if(!scanLib)scanLib=new Promise((ok,bad)=>{const s=document.createElement("script");s.src="scan.js";s.onload=ok;s.onerror=()=>{scanLib=null;bad()};document.head.appendChild(s)});
+  return scanLib;
+}
+function describeScan(t){
+  const g=parseGS1(t);
+  if(!g)return`<div><span class="k">Read</span><div class="v">${esc(cleanRaw(t))}</div></div>`;
+  return[["Lot",g.lot],["Serial",g.sn],["Expiry",g.exp+(g.exp&&g.exp<today()?" (expired)":"")],["GTIN",g.gtin]].filter(x=>x[1]).map(x=>`<div><span class="k">${x[0]}</span><div class="v">${esc(x[1])}</div></div>`).join("");
+}
+function stopCam(){try{scanCtl&&scanCtl.stop()}catch(_){}scanCtl=null;$("#scanTorch").hidden=true}
+async function startCam(){
+  const msg=$("#scanMsg");msg.textContent="";$("#scanRes").hidden=true;$("#scanUse").hidden=true;$("#scanAgain").hidden=true;$("#vf").hidden=false;$("#scanHint").hidden=false;
+  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){msg.textContent="This browser cannot open the camera. Use Take a photo instead.";$("#vf").hidden=true;return}
+  try{await loadScanLib()}catch(_){msg.textContent="The scanner could not load. Check the connection and try again.";return}
+  try{
+    scanCtl=await AuleaScan.start($("#scanVideo"),t=>{if(!scanCtl)return;stopCam();if(navigator.vibrate)try{navigator.vibrate(60)}catch(_){}gotScan(t)});
+    $("#scanTorch").hidden=!(scanCtl&&scanCtl.switchTorch);
+  }catch(e){
+    $("#vf").hidden=true;
+    msg.textContent=e&&e.name==="NotAllowedError"?"Camera access is blocked for this site. Allow the camera in the browser settings, or use Take a photo instead."
+      :e&&e.name==="NotFoundError"?"No camera was found. Use Take a photo instead.":"The camera could not start. Use Take a photo instead.";
+  }
+}
+function gotScan(t){
+  scanLast=t;$("#vf").hidden=true;$("#scanHint").hidden=true;
+  $("#scanRes").innerHTML=describeScan(t);$("#scanRes").hidden=false;$("#scanUse").hidden=false;$("#scanAgain").hidden=false;
+}
+function openScanner(cb){
+  scanCb=cb;scanLast="";torchOn=false;$("#scanner").hidden=false;document.body.style.overflow="hidden";startCam();
+}
+function closeScanner(){stopCam();$("#scanner").hidden=true;document.body.style.overflow="";scanCb=null}
+$("#scanCancel").onclick=closeScanner;
+$("#scanAgain").onclick=startCam;
+$("#scanUse").onclick=()=>{const cb=scanCb,t=scanLast;closeScanner();if(cb&&t)cb(t)};
+$("#scanTorch").onclick=async()=>{try{torchOn=!torchOn;await scanCtl.switchTorch(torchOn)}catch(_){$("#scanTorch").hidden=true}};
+$("#scanPhoto").onchange=async e=>{
+  const f=e.target.files[0];e.target.value="";if(!f)return;
+  stopCam();const msg=$("#scanMsg");msg.textContent="Reading the photo…";msg.style.color="var(--muted)";
+  try{await loadScanLib();const t=await AuleaScan.decodeFile(f);msg.textContent="";msg.style.color="";gotScan(t)}
+  catch(_){msg.style.color="";msg.textContent="No barcode found in that photo. Move closer so the barcode fills most of the picture, keep it sharp, and try again.";$("#vf").hidden=true}
+};
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!$("#scanner").hidden)closeScanner()});
+
 /* ---------- tabs ---------- */
 function showTab(which){
   ["form","list","users"].forEach(t=>{$("#tab-"+t).setAttribute("aria-selected",t===which);$("#view-"+t).hidden=t!==which});
@@ -488,14 +612,18 @@ let itemSeq=0;
 function addItem(v){
   v=v||{};const i=itemSeq++;const row=document.createElement("div");row.className="item";row.dataset.i=i;
   row.innerHTML=`<div class="field f-pn"><label for="pn${i}">PN / Product<span class="req">*</span></label><select id="pn${i}">${PRODUCTS.map(p=>`<option value="${p.pn}">${p.pn==="OTHER"?"":p.pn+" · "}${p.name}</option>`).join("")}</select></div>
-  <div class="field"><label for="lot${i}">Lot / Serial No.<span class="req">*</span></label><input type="text" id="lot${i}" class="mono" autocomplete="off" autocapitalize="characters" spellcheck="false"></div>
+  <div class="field"><label for="lot${i}">Lot / Serial No.<span class="req">*</span></label><div class="ig"><input type="text" id="lot${i}" class="mono" autocomplete="off" autocapitalize="characters" spellcheck="false"><button type="button" class="btn sm scanbtn" aria-label="Scan barcode for this item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 7V4h3M21 7V4h-3M3 17v3h3M21 17v3h-3M7 8v8M10 8v8M13 8v8M17 8v8"/></svg>Scan</button></div></div>
   <div class="field"><label for="qty${i}">Qty</label><input type="number" id="qty${i}" min="1" value="1" inputmode="numeric"></div>
   <button type="button" class="btn ghost danger sm rm" aria-label="Remove item">Remove</button>
-  <div class="field other" hidden><label for="opn${i}">Other PN and description</label><input type="text" id="opn${i}" class="mono" placeholder="PN – description"></div>`;
+  <div class="field other" hidden><label for="opn${i}">Other PN and description</label><input type="text" id="opn${i}" class="mono" placeholder="PN – description"></div>
+  <div class="udi" id="udi${i}" hidden></div>`;
   const sel=row.querySelector("select"),oth=row.querySelector(".other");
   sel.value=v.pn||"2490";oth.hidden=sel.value!=="OTHER";
   sel.onchange=()=>{oth.hidden=sel.value!=="OTHER"};
   row.querySelector(".rm").onclick=()=>{if($("#items").children.length>1)row.remove();syncRemove()};
+  row.udi=null;
+  row.querySelector(".scanbtn").onclick=()=>openScanner(text=>applyScanToItem(row,text));
+  row.querySelector("#lot"+i).addEventListener("input",()=>{if(row.udi){row.udi=null;showUdi(row)}});
   $("#items").appendChild(row);syncRemove();
 }
 function syncRemove(){const rows=[...$("#items").children];rows.forEach(r=>r.querySelector(".rm").hidden=rows.length<2)}
@@ -521,7 +649,8 @@ $("#demoSystem").onchange=()=>{const m=/^Veloxion ([12])$/.exec($("#demoSystem")
   [["unitDarwin","Darwin "+m[1]],["unitFSN","FSN "+m[1]]].forEach(([n,v])=>{const el=document.querySelector(`input[name=${n}][value="${v}"]`);if(el)el.checked=true});snHints()};
 function renderReg(){
   if($("#regRows").contains(document.activeElement))return;
-  $("#regRows").innerHTML=UNITS.map((x,i)=>`<tr><td class="num">${x.u}</td><td>${x.m}</td><td><input type="text" id="reg${i}" class="mono" placeholder="Pending" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="${x.u} serial number"></td></tr>`).join("");
+  $("#regRows").innerHTML=UNITS.map((x,i)=>`<tr><td class="num">${x.u}</td><td>${x.m}</td><td><div class="ig"><input type="text" id="reg${i}" class="mono" placeholder="Pending" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="${x.u} serial number"><button type="button" class="btn sm scanbtn" data-reg="${i}" aria-label="Scan ${x.u} serial number"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 7V4h3M21 7V4h-3M3 17v3h3M21 17v3h-3M7 8v8M10 8v8M13 8v8M17 8v8"/></svg></button></div></td></tr>`).join("");
+  $("#regRows").querySelectorAll("[data-reg]").forEach(b=>{b.hidden=!canAdmin;b.onclick=()=>openScanner(t=>{const g=parseGS1(t);$("#reg"+b.dataset.reg).value=(g&&(g.sn||g.lot))||t.replace(/[\x00-\x1f]/g,"").trim()})});
   UNITS.forEach((x,i)=>{$("#reg"+i).value=reg[x.u]||"";$("#reg"+i).disabled=!canAdmin});$("#regSave").hidden=!canAdmin;
 }
 $("#regSave").onclick=async()=>{
@@ -593,7 +722,8 @@ function collect(){
   const g=id=>$("#"+id).value.trim();
   const items=[...$("#items").children].map(r=>{const i=r.dataset.i,pn=$("#pn"+i).value,p=PRODUCTS.find(x=>x.pn===pn);
     const other=$("#opn"+i).value.trim();
-    return{pn:pn==="OTHER"?(other||"Other"):pn,name:pn==="OTHER"?"Other":p.name,lot:$("#lot"+i).value.trim(),qty:Math.max(1,parseInt($("#qty"+i).value,10)||1)}});
+    const u=r.udi||{};
+    return{pn:pn==="OTHER"?(other||"Other"):pn,name:pn==="OTHER"?"Other":p.name,lot:$("#lot"+i).value.trim(),qty:Math.max(1,parseInt($("#qty"+i).value,10)||1),gtin:u.gtin||"",sn:u.lot&&u.sn?u.sn:"",exp:u.exp||"",scanned:!!r.udi}});
   return{
     hospital:g("hospital"),country:$("#country").value,department:g("department"),surgeon:g("surgeon"),useDate:$("#useDate").value,
     demoSystem:$("#demoSystem").value,procedure:val("procedure")==="Other"?("Other: "+g("procedureOther")):val("procedure"),
@@ -684,7 +814,7 @@ async function openDetail(id){
       <div><dt>Date of use</dt><dd class="mono">${esc(r.useDate)}</dd></div><div><dt>Procedure</dt><dd>${esc(r.procedure||"—")}</dd></div>
       <div><dt>Demo system</dt><dd>${esc(r.demoSystem||"—")}</dd></div><div><dt>Submitted</dt><dd class="mono">${esc((r.createdAt||"").replace("T"," ").slice(0,16))} UTC${filler?" · "+esc(filler):""}</dd></div>
     </dl>
-    <div><div class="lbl" style="margin-bottom:6px">Products</div><div class="lines">${(r.items||[]).map(it=>`<div class="line"><span class="mono">${esc(it.pn)}</span><span>${esc(it.name)}</span><span class="mono">× ${esc(it.qty)}</span><span class="lot">Lot ${esc(it.lot)}</span></div>`).join("")}</div></div>
+    <div><div class="lbl" style="margin-bottom:6px">Products</div><div class="lines">${(r.items||[]).map(it=>`<div class="line"><span class="mono">${esc(it.pn)}</span><span>${esc(it.name)}</span><span class="mono">× ${esc(it.qty)}</span><span class="lot">Lot ${esc(it.lot)}${it.sn?" · SN "+esc(it.sn):""}${it.exp?" · Exp "+esc(it.exp):""}${it.gtin?" · GTIN "+esc(it.gtin):""}${it.scanned?" · scanned":""}</span></div>`).join("")}</div></div>
     ${equipHtml(r)}
     ${feedbackHtml(r)}
     <div class="sigs">
@@ -730,10 +860,10 @@ $("#xlsxBtn").onclick=async()=>{
       put(r.distSig,ci("s1"),115,46);put(r.hospSig,ci("s2"),115,46);put(r.stamp,ci("s3"),60,46);
     });
     const ws2=wb.addWorksheet("Product Lines",{views:[{state:"frozen",ySplit:1}]});
-    ws2.columns=[{header:"Report No.",key:"no",width:22},{header:"Date of Use",key:"d",width:12},{header:"Hospital",key:"h",width:28},{header:"Surgeon",key:"s",width:20},{header:"PN",key:"pn",width:10},{header:"Product",key:"name",width:30},{header:"Lot / Serial",key:"lot",width:18},{header:"Qty",key:"qty",width:6}];
+    ws2.columns=[{header:"Report No.",key:"no",width:22},{header:"Date of Use",key:"d",width:12},{header:"Hospital",key:"h",width:28},{header:"Surgeon",key:"s",width:20},{header:"PN",key:"pn",width:10},{header:"Product",key:"name",width:30},{header:"Lot / Serial",key:"lot",width:18},{header:"Qty",key:"qty",width:6},{header:"Serial (UDI)",key:"sn",width:16},{header:"Expiry",key:"exp",width:11},{header:"GTIN",key:"gtin",width:16},{header:"Entry",key:"how",width:9}];
     const h2=ws2.getRow(1);h2.font={bold:true,color:{argb:"FFFFFFFF"}};h2.fill={type:"pattern",pattern:"solid",fgColor:{argb:"FF0F6E66"}};
-    sorted.forEach(r=>(r.items||[]).forEach(it=>ws2.addRow({no:r.reportNo,d:r.useDate,h:r.hospital,s:r.surgeon,pn:it.pn,name:it.name,lot:it.lot,qty:it.qty})));
-    ws2.autoFilter={from:"A1",to:"H1"};ws.autoFilter={from:{row:1,column:1},to:{row:1,column:ws.columns.length}};
+    sorted.forEach(r=>(r.items||[]).forEach(it=>ws2.addRow({no:r.reportNo,d:r.useDate,h:r.hospital,s:r.surgeon,pn:it.pn,name:it.name,lot:it.lot,qty:it.qty,sn:it.sn||"",exp:it.exp||"",gtin:it.gtin||"",how:it.scanned?"Scanned":"Typed"})));
+    ws2.autoFilter={from:"A1",to:"L1"};ws.autoFilter={from:{row:1,column:1},to:{row:1,column:ws.columns.length}};
     const ws3=wb.addWorksheet("Equipment Register");
     ws3.columns=[{header:"Unit",key:"u",width:14},{header:"Model",key:"m",width:36},{header:"Serial No.",key:"sn",width:22}];
     const h3=ws3.getRow(1);h3.font={bold:true,color:{argb:"FFFFFFFF"}};h3.fill={type:"pattern",pattern:"solid",fgColor:{argb:"FF0F6E66"}};

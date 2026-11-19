@@ -4,6 +4,9 @@ Online case record (跟刀報告) for Aulea Veloxion demo and clinical evaluatio
 Runs as its own Netlify site, separate from ci747.com's main site.
 
 - `public/index.html` – the form, record list and Excel export (single page).
+- `src/scan.js` – barcode reader (ZXing), bundled to `public/scan.js` and loaded on the first Scan tap.
+  The page parses GS1/UDI data: (10) lot fills Lot, (21) serial and (17) expiry are kept, (01) GTIN
+  selects the PN when an earlier record already paired that GTIN with a PN.
 - `src/auth.js` – sign-in wrapper around Netlify Identity, bundled to `public/auth.js` by `npm run build`.
 - `netlify/functions/api.mts` – the only way to data. Every call needs a signed-in user;
   deleting records and editing the equipment register need the `admin` role.

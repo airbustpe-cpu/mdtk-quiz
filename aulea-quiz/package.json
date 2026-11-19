@@ -3,12 +3,14 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "esbuild src/auth.js --bundle --format=iife --target=es2020 --minify --outfile=public/auth.js && cp node_modules/exceljs/dist/exceljs.min.js public/exceljs.min.js"
+    "build": "esbuild src/auth.js --bundle --format=iife --target=es2020 --minify --outfile=public/auth.js && esbuild src/scan.js --bundle --format=iife --target=es2020 --minify --outfile=public/scan.js && cp node_modules/exceljs/dist/exceljs.min.js public/exceljs.min.js"
   },
   "dependencies": {
     "@netlify/blobs": "^10.0.0",
     "@netlify/functions": "^5.2.0",
-    "@netlify/identity": "latest"
+    "@netlify/identity": "latest",
+    "@zxing/browser": "^0.1.5",
+    "@zxing/library": "^0.21.3"
   },
   "devDependencies": {
     "esbuild": "^0.25.0",

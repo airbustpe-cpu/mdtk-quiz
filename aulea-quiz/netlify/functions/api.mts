@@ -29,6 +29,10 @@ function cleanReport(b: any) {
         name: str(it?.name, 80),
         lot: str(it?.lot, 80),
         qty: Math.min(999, Math.max(1, Number.parseInt(it?.qty, 10) || 1)),
+        gtin: /^\d{14}$/.test(it?.gtin) ? it.gtin : "",
+        sn: str(it?.sn, 80),
+        exp: /^\d{4}-\d{2}-\d{2}$/.test(it?.exp) ? it.exp : "",
+        scanned: it?.scanned === true,
       }))
     : [];
   const ratings: Record<string, number | string> = {};

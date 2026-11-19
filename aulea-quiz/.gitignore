@@ -1,4 +1,5 @@
 node_modules
 .netlify
 public/auth.js
+public/scan.js
 public/exceljs.min.js
